@@ -135,6 +135,13 @@ contract BTCBorrow is BorrowAbstract {
         totalSupplied = totalSupplied.sub(withdrawAssetAmount);
     }
 
+    function mintableTUSD(uint supplyAmount) external view returns (uint) {
+        BorrowInfo storage userBorrowInfo = borrowInfoMap[msg.sender];
+        uint maxBorrowUSDC = getBorrowableUsdc(supplyAmount.add(userBorrowInfo.supplied));
+        uint256 mintable = getMintableToken(msg.sender, maxBorrowUSDC);
+        return mintable;
+    }
+
     function getTotalAmountSupplied(address user) public view returns (uint) {
         BorrowInfo storage userInfo = borrowInfoMap[user];
         return userInfo.supplied;
