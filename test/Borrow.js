@@ -10,7 +10,7 @@ let owner;
 let otherAccount;
 
 const uniswapRouterAddress = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
-const wbtcAddress = "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"; 
+const wbtcAddress = "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"; 
 
 describe("BTCBorrow", function () {
   
@@ -81,30 +81,31 @@ describe("BTCBorrow", function () {
       console.log(await btcBorrow.mintableTUSD(100000000));
     })
 
-    // it("Should borrow TUSD for supply of 1WBTC ", async function() {
-    //   const uniswapRouter = new ethers.Contract(uniswapRouterAddress, ['function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) payable returns (uint[] memory amounts)'], owner);
-    //   const amountOutMin = 1;
-    //   const path = [ethers.constants.AddressZero, wbtcAddress];
-    //   const to = owner.address;
-    //   const deadline = Math.floor(Date.now() / 1000) + 60;
-    //   const result = await uniswapRouter.swapExactETHForTokens(amountOutMin, path, to, deadline, { value: ethers.utils.parseEther("1") });
-    //   console.log("Swap Result:", result);
-    //   onsole.log("TEST ",await btcBorrow.borrow(100000000, 29023406389));
-    // })
-  // });
-
   // describe("Swap tokens and test", function () {
     it("Should borrow TUSD for supply of 1WBTC ", async function() {
       try{
-        const uniswapRouter = new ethers.Contract(uniswapRouterAddress, uniswapABI, owner);
+        const uniswapRouter = new ethers.Contract(uniswapRouterAddress, ['function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)'], owner);
         const amountOutMin = 1;
         const path = ["0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", wbtcAddress];
         const to = owner.address;
         const deadline = Math.floor(Date.now() / 1000) + 60000;
         const weiValue = await ethers.parseUnits('10', 18);
         const result = await uniswapRouter.swapExactETHForTokens(amountOutMin, path, to, deadline, {value: weiValue});
+        const receipt = await result.wait();
+        console.log("Transaction Receipt:", receipt);
         console.log("Swap Result: ", result);
         console.log("TEST ", deadline);
+      }
+      catch (error) {
+        console.error("Error:", error.message || error.reason || error.toString());
+      }
+    })
+
+    it("Should swap ETH for 1WBTC ", async function() {
+      try{
+        const weiValue = await ethers.parseUnits('10', 18);
+        const result = await btcBorrow.swapEth({value: weiValue});
+        console.log("Swap Result: ", result);
       }
       catch (error) {
         console.error("Error:", error.message || error.reason || error.toString());
