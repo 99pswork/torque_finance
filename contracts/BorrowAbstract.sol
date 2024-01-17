@@ -37,6 +37,8 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
     uint public totalBorrow;
     uint public totalSupplied;
     uint public lastClaimCometTime;
+
+    uint256 public decimalAdjust = 1000000000000;
     
     bytes32 public constant ACTION_SUPPLY_ASSET = "ACTION_SUPPLY_ASSET";
     bytes32 public constant ACTION_SUPPLY_ETH = "ACTION_SUPPLY_NATIVE_TOKEN";
@@ -211,23 +213,33 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
         uint256 MIN_HEALTH_FACTOR = ITUSDEngine(engine).getMinHealthFactor();
         uint256 totalMintable = _usdcSupply*LIQUIDATION_THRESHOLD/LIQUIDATION_PRECISION;
         totalMintable = totalMintable*PRECISION/MIN_HEALTH_FACTOR;
+        totalMintable *= decimalAdjust;
         require(totalMintable > totalTusdMinted, "User can not mint more TUSD");
         totalMintable -= totalTusdMinted;
         return totalMintable;
     }
 
+    // Need decimal adjustment
     function getBurnableToken(address _user, uint256 _tUsdRepayAmount) public view returns (uint256) {
-        (uint256 totalTusdMinted,uint256 collateralValueInUsd) = ITUSDEngine(engine).getAccountInformation(_user);
+        (uint256 totalTusdMinted,) = ITUSDEngine(engine).getAccountInformation(_user);
+        uint256 collateralValueInUsd = ITUSDEngine(engine).getCollateralBalanceOfUser(_user);
         uint256 LIQUIDATION_THRESHOLD = ITUSDEngine(engine).getLiquidationThreshold();
         uint256 PRECISION = ITUSDEngine(engine).getPrecision();
         uint256 LIQUIDATION_PRECISION = ITUSDEngine(engine).getLiquidationPrecision();
         uint256 MIN_HEALTH_FACTOR = ITUSDEngine(engine).getMinHealthFactor();
         require(totalTusdMinted >= _tUsdRepayAmount, "You have not minted enough TUSD");
         totalTusdMinted -= _tUsdRepayAmount;
-        uint256 totalWithdrawableCollateral = totalTusdMinted*LIQUIDATION_PRECISION/LIQUIDATION_THRESHOLD;
-        totalWithdrawableCollateral = totalWithdrawableCollateral*MIN_HEALTH_FACTOR/PRECISION;
-        require(totalWithdrawableCollateral <= collateralValueInUsd, "User cannot withdraw more collateral");
-        totalWithdrawableCollateral = collateralValueInUsd - totalWithdrawableCollateral;
+        uint256 totalWithdrawableCollateral;
+        if(totalTusdMinted == 0){
+            totalWithdrawableCollateral = collateralValueInUsd;
+        }
+        else{
+            totalWithdrawableCollateral = totalTusdMinted*LIQUIDATION_PRECISION/LIQUIDATION_THRESHOLD;
+            totalWithdrawableCollateral = totalWithdrawableCollateral*MIN_HEALTH_FACTOR/PRECISION;
+            totalWithdrawableCollateral /= decimalAdjust;
+            require(totalWithdrawableCollateral <= collateralValueInUsd, "User cannot withdraw more collateral");
+            totalWithdrawableCollateral = collateralValueInUsd - totalWithdrawableCollateral;
+        }
         return totalWithdrawableCollateral;
     }
     
