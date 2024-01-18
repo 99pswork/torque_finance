@@ -168,7 +168,7 @@ contract BTCBorrow is BorrowAbstract {
         return withdrawAssetAmount;
     }
 
-    function getWbtcWithdrawWithSlippage(uint256 tusdRepayAmount) public view returns (uint256) {
+    function getWbtcWithdrawWithSlippage(uint256 tusdRepayAmount, uint256 _repaySlippage) public view returns (uint256) {
         require(tusdRepayAmount > 0, "Repay amount must be greater than 0");
         BorrowInfo storage userBorrowInfo = borrowInfoMap[msg.sender];
         uint256 withdrawUsdcAmountFromEngine = getBurnableToken(tusdRepayAmount, userBorrowInfo.baseBorrowed, userBorrowInfo.borrowed);
@@ -176,6 +176,6 @@ contract BTCBorrow is BorrowAbstract {
         uint256 totalBorrowed = userBorrowInfo.borrowed.add(accruedInterest);
         uint repayUsdcAmount = min(withdrawUsdcAmountFromEngine, totalBorrowed);
         uint256 withdrawAssetAmount = userBorrowInfo.supplied.mul(repayUsdcAmount).div(userBorrowInfo.borrowed);
-        return withdrawAssetAmount.mul(100-repaySlippage).div(100);
+        return withdrawAssetAmount.mul(100-_repaySlippage).div(100);
     }
 }
