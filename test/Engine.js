@@ -23,7 +23,8 @@ describe("EngineContract", function () {
     console.log("OWNER ADDRESS", owner.address);
     const EngineContract = await ethers.getContractFactory("TUSDEngine");
     const engineContract = await EngineContract.deploy("0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-    "0x50834f3163758fcc1df9973b6e91f0f0f0434ad3");
+    "0x50834f3163758fcc1df9973b6e91f0f0f0434ad3",
+    "0xf7F6718Cf69967203740cCb431F6bDBff1E0FB68");
     return engineContract;
   }
 
