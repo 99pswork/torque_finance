@@ -36,7 +36,7 @@ contract BTCBorrow is BorrowAbstract {
         _tusd,
         _treasury,
         _repaySlippage
-    ) {}
+    ) Ownable(msg.sender) {}
     // Approve the contract of WBTC usage
     function borrow(uint supplyAmount, uint borrowAmountUSDC, uint tUSDBorrowAmount) public nonReentrant(){
         require(supplyAmount > 0, "Supply amount must be greater than 0");
