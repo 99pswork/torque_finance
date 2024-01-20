@@ -60,6 +60,11 @@ describe("BTCBorrow", function () {
       expect(await btcBorrow.getBorrowableUsdc(100000000)).to.not.equal(0);
     });
 
+    it("Should get WBTC", async function() {
+      console.log("TEST Collateral Factor ", await btcBorrow.getWbtcWithdraw(BigInt(1660685895000000000)));
+      // expect(await btcBorrow.getCollateralFactor()).to.not.equal(0);
+    })
+
     it("Should get collateral factor from coment", async function() {
       console.log("TEST Collateral Factor ", await btcBorrow.getCollateralFactor());
       expect(await btcBorrow.getCollateralFactor()).to.not.equal(0);

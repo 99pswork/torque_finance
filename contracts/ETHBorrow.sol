@@ -134,8 +134,8 @@ contract ETHBorrow is BorrowAbstract {
         totalSupplied = totalSupplied.sub(WETHWithdraw);
     }
 
-    function mintableTUSD(uint supplyAmount) external view returns (uint) {
-        BorrowInfo storage userBorrowInfo = borrowInfoMap[msg.sender];
+    function mintableTUSD(uint supplyAmount, address _address) external view returns (uint) {
+        BorrowInfo storage userBorrowInfo = borrowInfoMap[_address];
         uint maxBorrowUSDC = getBorrowableUsdc(supplyAmount.add(userBorrowInfo.supplied));
         uint256 mintable = getMintableToken(maxBorrowUSDC, userBorrowInfo.baseBorrowed, 0);
         return mintable;
@@ -183,5 +183,3 @@ contract ETHBorrow is BorrowAbstract {
         return asset;
     }
 }
-//6709842000000000000
-//1660685895000000000
