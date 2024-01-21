@@ -51,7 +51,7 @@ describe("BTCBorrow", function () {
     // });
 
     it("Should get 100% of USDC values when burning", async function () {
-      console.log("BURNABLE TOKEN ", await btcBorrow.getBurnableToken(BigInt(980000000000000000), BigInt(980000000000000000), BigInt(1000000)));
+      console.log("BURNABLE TOKEN ", await btcBorrow.getBurnableToken(BigInt(1004200540012685969), BigInt(1064200540012685969), BigInt(1090544)));
     });
 
     it("Should get borrowable usdc", async function () {

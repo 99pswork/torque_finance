@@ -27,7 +27,7 @@ async function deployBorrowETHContract() {
     console.error("Error deploying ETHBorrow:", error.message);
     process.exit(1);
   }
-  console.log("ETH Borrow Contract Address", btcBorrow.target);
+  console.log("ETH Borrow Contract Address", ethBorrow.target);
   return ethBorrow;
 }
 
