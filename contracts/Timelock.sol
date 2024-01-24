@@ -2,8 +2,11 @@
 pragma solidity ^0.8.19;
 
 import "./interfaces/ITimelock.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Timelock is ITimelock {
+    using SafeMath for uint;
+
     uint public immutable GRACE_PERIOD;
     uint public immutable MINIMUM_DELAY;
     uint public immutable MAXIMUM_DELAY;
@@ -54,7 +57,7 @@ contract Timelock is ITimelock {
 
     function queueTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) public returns (bytes32) {
         require(msg.sender == admin, "Timelock::queueTransaction: Call must come from admin.");
-        require(eta >= (getBlockTimestamp() + delay), "Timelock::queueTransaction: Estimated execution block must satisfy delay.");
+        require(eta >= getBlockTimestamp().add(delay), "Timelock::queueTransaction: Estimated execution block must satisfy delay.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         queuedTransactions[txHash] = true;
@@ -78,7 +81,7 @@ contract Timelock is ITimelock {
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         require(queuedTransactions[txHash], "Timelock::executeTransaction: Transaction hasn't been queued.");
         require(getBlockTimestamp() >= eta, "Timelock::executeTransaction: Transaction hasn't surpassed time lock.");
-        require(getBlockTimestamp() <= (eta + GRACE_PERIOD), "Timelock::executeTransaction: Transaction is stale.");
+        require(getBlockTimestamp() <= eta.add(GRACE_PERIOD), "Timelock::executeTransaction: Transaction is stale.");
 
         queuedTransactions[txHash] = false;
 
@@ -90,6 +93,7 @@ contract Timelock is ITimelock {
             callData = abi.encodePacked(bytes4(keccak256(bytes(signature))), data);
         }
 
+        // solium-disable-next-line security/no-call-value
         (bool success, bytes memory returnData) = target.call{value: value}(callData);
         require(success, "Timelock::executeTransaction: Transaction execution reverted.");
 
@@ -99,6 +103,7 @@ contract Timelock is ITimelock {
     }
 
     function getBlockTimestamp() internal view returns (uint) {
+        // solium-disable-next-line security/no-block-members
         return block.timestamp;
     }
 }
