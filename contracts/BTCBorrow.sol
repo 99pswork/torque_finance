@@ -202,4 +202,14 @@ contract BTCBorrow is BorrowAbstract {
         // Final State Update
         totalBorrow = totalBorrow.add(_amountToMint);
     }
+
+    function maxMoreMintable(address _address) public view returns (uint256) {
+        BorrowInfo storage userBorrowInfo = borrowInfoMap[_address];
+        uint256 borrowedTUSD = userBorrowInfo.baseBorrowed;
+        uint256 borrowedAmount = borrowHealth[_address];
+        borrowedAmount =  borrowedAmount.mul(decimalAdjust)
+            .mul(LIQUIDATION_PRECISION)
+            .div(LIQUIDATION_THRESHOLD);
+        return borrowedAmount - borrowedTUSD;
+    }
 }

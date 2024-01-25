@@ -4,12 +4,22 @@ pragma solidity ^0.8.19;
 import "./interfaces/ITimelock.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Timelock is ITimelock {
+contract Timelock {
     using SafeMath for uint;
 
-    uint public immutable GRACE_PERIOD;
-    uint public immutable MINIMUM_DELAY;
-    uint public immutable MAXIMUM_DELAY;
+    event NewAdmin(address indexed newAdmin);
+    event NewPendingAdmin(address indexed newPendingAdmin);
+    event NewDelay(uint indexed newDelay);
+    event CancelTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature,  bytes data, uint eta);
+    event ExecuteTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature,  bytes data, uint eta);
+    event QueueTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature, bytes data, uint eta);
+
+    uint public immutable GRACE_PERIOD = 14 days;
+    // uint public immutable MINIMUM_DELAY = 2 days; // Revert before main deployment
+    // uint public immutable MAXIMUM_DELAY = 10 days; // Revert before main deployment
+
+    uint public immutable MINIMUM_DELAY = 2 minutes; // remove
+    uint public immutable MAXIMUM_DELAY = 30 minutes; // remove
 
     address public admin;
     address public pendingAdmin;
@@ -17,13 +27,9 @@ contract Timelock is ITimelock {
 
     mapping (bytes32 => bool) public queuedTransactions;
 
-    constructor(address admin_, uint delay_, uint gracePeriod_, uint minimumDelay_, uint maxiumumDelay_) public {
-        require(delay_ >= minimumDelay_, "Timelock::constructor: Delay must exceed minimum delay.");
-        require(delay_ <= maxiumumDelay_, "Timelock::setDelay: Delay must not exceed maximum delay.");
-
-        GRACE_PERIOD = gracePeriod_;
-        MINIMUM_DELAY = minimumDelay_;
-        MAXIMUM_DELAY = maxiumumDelay_;
+    constructor(address admin_, uint delay_) public {
+        require(delay_ >= MINIMUM_DELAY, "Timelock::constructor: Delay must exceed minimum delay.");
+        require(delay_ <= MAXIMUM_DELAY, "Timelock::setDelay: Delay must not exceed maximum delay.");
 
         admin = admin_;
         delay = delay_;

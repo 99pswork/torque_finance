@@ -56,10 +56,10 @@ interface ITimelock {
      * @notice Set the delay value
      * @param delay New delay value
      */
-    function setDelay(uint delay) virtual external;
+    function setDelay(uint delay) external;
 
     /// @notice Mapping of transaction hashes to whether that transaction is currently enqueued
-    function queuedTransactions(bytes32 txHash) virtual external returns (bool);
+    function queuedTransactions(bytes32 txHash) external returns (bool);
 
     /**
      * @notice Enque a transaction
@@ -70,7 +70,7 @@ interface ITimelock {
      * @param eta Timestamp of when the transaction can be executed
      * @return txHash of the enqueued transaction
      */
-    function queueTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) virtual external returns (bytes32);
+    function queueTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) external returns (bytes32);
 
     /**
      * @notice Cancel an enqueued transaction
@@ -80,7 +80,7 @@ interface ITimelock {
      * @param data Calldata for the transaction to cancel
      * @param eta Timestamp of the transaction to cancel
      */
-    function cancelTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) virtual external;
+    function cancelTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) external;
 
     /**
      * @notice Execute an enqueued transaction
@@ -91,5 +91,5 @@ interface ITimelock {
      * @param eta Timestamp of the transaction to execute
      * @return bytes returned from executing transaction
      */
-    function executeTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) virtual external payable returns (bytes memory);
+    function executeTransaction(address target, uint value, string memory signature, bytes memory data, uint eta) external payable returns (bytes memory);
 }
