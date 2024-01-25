@@ -4,7 +4,8 @@
     "hardhat": "^2.19.4"
   },
   "devDependencies": {
-    "@chainlink/contracts": "^0.8.0",
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0"
+    "@chainlink/contracts": "^0.5.1",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@uniswap/v3-periphery": "^1.4.4"
   }
 }

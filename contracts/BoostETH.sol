@@ -25,13 +25,13 @@ import "./strategies/GMXV2ETH.sol";
 contract BoostETH is AutomationCompatible, ERC4626, ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     
-    IERC20 public wethToken;
+    IERC20 public wethToken; // WETH Address
     GMXV2ETH public gmxV2Eth;
     StargateETH public stargateETH;
     address public treasury;
 
-    uint256 public gmxAllocation;
-    uint256 public uniswapAllocation;
+    uint256 public gmxAllocation = 50;
+    uint256 public stargateAllocation = 50;
     uint256 public lastCompoundTimestamp;
     uint256 public performanceFee;
 
@@ -45,8 +45,7 @@ contract BoostETH is AutomationCompatible, ERC4626, ReentrancyGuard, Ownable {
     ) ERC4626(_asset) Ownable(msg.sender) ERC20(_name, _symbol) {
         gmxV2Eth = GMXV2ETH(_gmxV2ETHAddress);
         stargateETH = StargateETH(_startgateETHAddress);
-        gmxAllocation = 50;
-        uniswapAllocation = 50;
+        wethToken = _asset;
         treasury = _treasury;
     }
 
@@ -75,11 +74,11 @@ contract BoostETH is AutomationCompatible, ERC4626, ReentrancyGuard, Ownable {
     function _deposit(uint256 amount) internal {
         require(amount > 0, "Deposit amount must be greater than zero");
         uint256 gmxAllocationAmount = amount.mul(gmxAllocation).div(100);
-        uint256 uniswapAllocationAmount = amount.sub(gmxAllocationAmount);
+        uint256 stargateAllocationAmount = amount.sub(gmxAllocationAmount);
         wethToken.approve(address(gmxV2Eth), gmxAllocationAmount);
         gmxV2Eth.deposit(gmxAllocationAmount);
-        wethToken.approve(address(stargateETH), uniswapAllocationAmount);
-        stargateETH.deposit(uniswapAllocationAmount);
+        wethToken.approve(address(stargateETH), stargateAllocationAmount);
+        stargateETH.deposit(stargateAllocationAmount);
         uint256 shares = _convertToShares(amount, Math.Rounding.Down);
         _mint(msg.sender, shares);
     }
@@ -87,19 +86,19 @@ contract BoostETH is AutomationCompatible, ERC4626, ReentrancyGuard, Ownable {
     function _withdraw(uint256 sharesAmount) internal {
         require(sharesAmount > 0, "Withdraw amount must be greater than zero");
         require(balanceOf(msg.sender) >= sharesAmount, "Insufficient balance");
-        uint256 totalBTCAmount = _convertToAssets(sharesAmount, Math.Rounding.Down);
-        uint256 gmxWithdrawAmount = totalBTCAmount.mul(gmxAllocation).div(100);
-        uint256 uniswapWithdrawAmount = totalBTCAmount.sub(gmxWithdrawAmount);
+        uint256 totalETHAmount = _convertToAssets(sharesAmount, Math.Rounding.Down);
+        uint256 gmxWithdrawAmount = totalETHAmount.mul(gmxAllocation).div(100);
+        uint256 stargateWithdrawAmount = totalETHAmount.sub(gmxWithdrawAmount);
         _burn(msg.sender, sharesAmount);
         gmxV2Eth.withdraw(gmxWithdrawAmount);
-        stargateETH.withdraw(uniswapWithdrawAmount);
-        wethToken.transfer(msg.sender, totalBTCAmount);
+        stargateETH.withdraw(stargateWithdrawAmount);
+        wethToken.transfer(msg.sender, totalETHAmount);
     }
 
     function _compoundFees() internal {
-        uint256 gmxV2btcBalanceBefore = gmxV2Eth.balanceOf(address(this));
-        uint256 uniswapbtcBalanceBefore = stargateETH.balanceOf(address(this));
-        uint256 totalBalanceBefore = gmxV2btcBalanceBefore.add(uniswapbtcBalanceBefore);
+        uint256 gmxV2ethBalanceBefore = gmxV2Eth.balanceOf(address(this));
+        uint256 stargateEthBalanceBefore = stargateETH.balanceOf(address(this));
+        uint256 totalBalanceBefore = gmxV2ethBalanceBefore.add(stargateEthBalanceBefore);
         // gmxV2Eth.withdrawGMX(); // PS fix this
         // stargateETH.withdrawuniswap(); // PS fix this
         uint256 feeAmount = totalBalanceBefore.mul(performanceFee).div(10000);
@@ -115,10 +114,10 @@ contract BoostETH is AutomationCompatible, ERC4626, ReentrancyGuard, Ownable {
         lastCompoundTimestamp = block.timestamp;
     }
 
-    function setAllocation(uint256 _gmxAllocation,uint256 _uniswapAllocation) public onlyOwner {
-        
+    function setAllocation(uint _gmxAllocation,uint _stargateAllocation) public onlyOwner {
+        require(_gmxAllocation + _stargateAllocation == 100, "Allocation more than 100%");
         gmxAllocation = _gmxAllocation;
-        uniswapAllocation = _uniswapAllocation;
+        stargateAllocation = _stargateAllocation;
     }
 
     function setPerformanceFee(uint256 _performanceFee) public onlyOwner {
@@ -129,9 +128,13 @@ contract BoostETH is AutomationCompatible, ERC4626, ReentrancyGuard, Ownable {
         treasury = _treasury;
     }
 
-    // function _checkUpkeep(bytes calldata) external virtual view returns (bool upkeepNeeded, bytes memory);
+    function _checkUpkeep(bytes calldata) external virtual view returns (bool upkeepNeeded, bytes memory){
+
+    }
     
-    // function _performUpkeep(bytes calldata) external virtual;
+    function _performUpkeep(bytes calldata) external virtual{
+        
+    }
 
     receive() external payable {}
 }

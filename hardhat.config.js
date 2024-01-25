@@ -3,15 +3,23 @@ const CONFIG = require("./credentials.json");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.19",
+  solidity: {
+    version: "0.8.19",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200, // Adjust the number of runs as needed
+      },
+    },
+  },
   networks: {
     arbitrum: {
 			url: CONFIG["Mainnet_ARB"],
 			accounts: [CONFIG["PKEY"]],
 		},
     goerli: {
-			url: CONFIG["RINKEBY"]["URL"],
-			accounts: [CONFIG["RINKEBY"]["PKEY"]],
+			url: CONFIG["GOERLI"]["URL"],
+			accounts: [CONFIG["GOERLI"]["PKEY"]],
 		},
     hardhat: {
       forking: {
