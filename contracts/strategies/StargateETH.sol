@@ -17,11 +17,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "../interfaces/IStargateLPStakingTime.sol";
 import "../interfaces/IStargateRouterETH.sol";
-import "../../StargateContracts/interfaces/IStargateRouter.sol";
-import "../../StargateContracts/LPStakingTime.sol";
+import "../interfaces/IStargateRouter.sol";
+import "./LPStakingTime.sol";
 import "../interfaces/IWETH9.sol";
 
-import "../../UniswapContracts/ISwapRouter.sol";
+import "../interfaces/ISwapRouter.sol";
 
 contract StargateETH is Ownable, ReentrancyGuard{
     using SafeMath for uint256;
@@ -38,7 +38,7 @@ contract StargateETH is Ownable, ReentrancyGuard{
     uint256 public depositedWethAmount;
     uint256 minARBAmount = 1000000000000000000;
     
-    constructor(address payable weth_, address wethSTG_, address arbToken_, address payable routerETH_, address lpStakingTime_, address router_, address swapRouter_){
+    constructor(address payable weth_, address wethSTG_, address arbToken_, address payable routerETH_, address lpStakingTime_, address router_, address swapRouter_) Ownable(msg.sender) {
         weth = IWETH9(weth_);
         wethSTG = IERC20(wethSTG_);
         arbToken = IERC20(arbToken_);

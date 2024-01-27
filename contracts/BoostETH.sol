@@ -37,7 +37,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     
     uint256 public totalAssetsAmount;
 
-    constructor(string memory _name, string memory _symbol, address payable weth_, address payable gmxV2ETH_, address payable stargateETH_, address treasury_) ERC20(_name, _symbol){
+    constructor(string memory _name, string memory _symbol, address payable weth_, address payable gmxV2ETH_, address payable stargateETH_, address treasury_) ERC20(_name, _symbol) Ownable(msg.sender) {
         weth = IWETH9(weth_);
         gmxV2ETH = GMXV2ETH(gmxV2ETH_);
         stargateETH = StargateETH(stargateETH_);

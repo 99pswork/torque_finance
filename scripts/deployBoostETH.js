@@ -14,8 +14,8 @@ async function deployBoostETHContract() {
   let boostETH;
   console.log("Boost ETH factory created.");
   try{
-    boostETH = await BoostETH.deploy("tToken",
-    "tToken",
+    boostETH = await BoostETH.deploy("Torque ETH",
+    "tETH",
     "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
     "0xD2BfD7BFA4Bff534e972C4989a341d514F202b35",
     "0xF3a9d3f3EC8c2dADF1c7636d30a7bC63Bd9Da6dA",

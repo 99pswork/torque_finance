@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../../UniswapContracts/ISwapRouter.sol";
+import "../interfaces/ISwapRouter.sol";
 import "../interfaces/IGMXExchangeRouter.sol";
 import "../interfaces/IWETH9.sol";
 
@@ -41,7 +41,7 @@ contract GMXV2ETH is Ownable, ReentrancyGuard {
     uint256 minUSDCAmount = 0;
     uint256 minARBAmount = 1000000000000000000;
 
-    constructor(address payable weth_, address gmToken_, address usdcToken_, address arbToken_, address payable exchangeRouter_, address swapRouter_, address depositVault_, address withdrawalVault_, address router_){
+    constructor(address payable weth_, address gmToken_, address usdcToken_, address arbToken_, address payable exchangeRouter_, address swapRouter_, address depositVault_, address withdrawalVault_, address router_) Ownable(msg.sender) {
         weth = IWETH9(weth_);
         gmToken = IERC20(gmToken_);
         usdcToken = IERC20(usdcToken_);

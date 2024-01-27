@@ -20,7 +20,8 @@ async function deployGMXV2ETHContract() {
     "0x7c68c7866a64fa2160f78eeae12217ffbf871fa8",
     "0xe592427a0aece92de3edee1f18e0157c05861564",
     "0xF89e77e8Dc11691C9e8757e84aaFbCD8A67d7A55",
-    "0x0628D46b5D145f183AdB6Ef1f2c97eD1C4701C55"); // Pass constructor Arguments 
+    "0x0628D46b5D145f183AdB6Ef1f2c97eD1C4701C55",
+    "0x7452c558d45f8afC8c83dAe62C3f8A5BE19c71f6"); // Pass constructor Arguments 
   }
   catch (error) {
     console.error("Error deploying GMX V2:", error.message);
