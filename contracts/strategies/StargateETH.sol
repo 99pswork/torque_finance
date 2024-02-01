@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IStargateLPStakingTime.sol";
 import "../interfaces/IStargateRouterETH.sol";
 import "../interfaces/IStargateRouter.sol";
-import "./LPStakingTime.sol";
+import "../utils/LPStakingTime.sol";
 import "../interfaces/IWETH9.sol";
 
 import "../interfaces/ISwapRouter.sol";

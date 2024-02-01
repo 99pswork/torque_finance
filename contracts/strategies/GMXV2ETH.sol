@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/ISwapRouter.sol";
 import "../interfaces/IGMXExchangeRouter.sol";
 import "../interfaces/IWETH9.sol";
-import "./GMXOracle.sol";
+import "../utils/GMXOracle.sol";
 
 contract GMXV2ETH is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
