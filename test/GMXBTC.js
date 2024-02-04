@@ -36,7 +36,11 @@ const {
   
       it('Should get GM TOKEN Value Address', async function(){
         // console.log("KECCAK ", await gmxBtc.MAX_PNL_FACTOR_FOR_WITHDRAWALS());
-        console.log("GM Token VALUE", await gmxBtc.calculateGMPrice(BigInt(0)));
+        console.log("GM Token VALUE", await gmxBtc.calculateGMPrice(BigInt(1690990593069474751)));
+      })
+
+      it('Should get getAdjustedSupply', async function(){
+        console.log("GM Adjusted supply ", await gmxBtc.getAdjustedSupply(BigInt(7620293161910374028522110000000000), BigInt(72448696532436667439400000000000), BigInt(54056940787273695557787397837767890), BigInt(-30258188611021620216432750689167659866), BigInt(994913924)));
       })
 
       //calculateGMPrice2

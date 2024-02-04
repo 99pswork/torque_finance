@@ -219,37 +219,54 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
             MAX_PNL_FACTOR_FOR_WITHDRAWALS,
             false
             );
-        uint256 totalGMSupply = gmToken.totalSupply(); // 0x47c031236e19d024b42f8AE6780E44A573170703 USE THIS
-        // return (uint256(marketTokenPrice), totalGMSupply);
+        uint256 totalGMSupply = gmToken.totalSupply(); 
         uint256 adjustedSupply = getAdjustedSupply(marketPoolValueInfo.longTokenUsd , marketPoolValueInfo.shortTokenUsd , marketPoolValueInfo.totalBorrowingFees, marketPoolValueInfo.netPnl, marketPoolValueInfo.impactPoolAmount);
-        // return (totalGMSupply, adjustedSupply);
-        return getBtcNUsdcAmount(gmAmountWithdraw, adjustedSupply.div(totalGMSupply), marketPoolValueInfo.longTokenUsd.div(10e11), marketPoolValueInfo.shortTokenUsd, marketPoolValueInfo.longTokenUsd.div(marketPoolValueInfo.longTokenAmount), marketPoolValueInfo.shortTokenUsd.div(marketPoolValueInfo.shortTokenAmount));
+        return getBtcNUsdcAmount(gmAmountWithdraw, adjustedSupply.div(totalGMSupply), marketPoolValueInfo.longTokenUsd.div(100), marketPoolValueInfo.shortTokenUsd, marketPoolValueInfo.longTokenUsd.div(marketPoolValueInfo.longTokenAmount), marketPoolValueInfo.shortTokenUsd.div(marketPoolValueInfo.shortTokenAmount));
     }
 
-    function getBtcNUsdcAmount(uint256 gmxWithdraw, uint256 price, uint256 wethVal, uint256 usdcVal, uint256 wethPrice, uint256 usdcPrice) public view returns (uint256, uint256) {
-        uint256 wethAmountUSD = gmxWithdraw.mul(price).div(10e6).mul(wethVal);
-        wethAmountUSD = wethAmountUSD.div(wethVal.add(usdcVal));
+    function getBtcNUsdcAmount(uint256 gmxWithdraw, uint256 price, uint256 wbtcVal, uint256 usdcVal, uint256 wbtcPrice, uint256 usdcPrice) internal view returns (uint256, uint256) {
+        uint256 wbtcAmountUSD = gmxWithdraw.mul(price).div(10e5).mul(wbtcVal);
+        wbtcAmountUSD = wbtcAmountUSD.div(wbtcVal.add(usdcVal));
 
-        uint256 usdcAmountUSD = gmxWithdraw.mul(price).div(10e6).mul(usdcVal);
-        usdcAmountUSD = usdcAmountUSD.div(wethVal.add(usdcVal));
-        return(wethAmountUSD.mul(10e19).div(wethPrice), usdcAmountUSD.mul(10e7).div(usdcPrice));
+        uint256 usdcAmountUSD = gmxWithdraw.mul(price).div(10e5).mul(usdcVal);
+        usdcAmountUSD = usdcAmountUSD.div(wbtcVal.add(usdcVal));
+        return(wbtcAmountUSD.mul(10e8).div(wbtcPrice), usdcAmountUSD.mul(10e6).div(usdcPrice));
     }
 
-    function getAdjustedSupply(uint256 wethPool, uint256 usdcPool, uint256 totalBorrowingFees, int256 pnl, uint256 impactPoolPrice) view internal returns(uint256 adjustedSupply) {
-        wethPool = wethPool.div(10e12);
+    function getAdjustedSupply(uint256 wbtcPool, uint256 usdcPool, uint256 totalBorrowingFees, int256 pnl, uint256 impactPoolPrice) view internal returns (uint256) {
+        wbtcPool = wbtcPool.div(10e2);
         usdcPool = usdcPool.div(10);
         totalBorrowingFees = totalBorrowingFees.div(10e6);
         impactPoolPrice = impactPoolPrice.mul(10e6);
         uint256 newPNL;
         if(pnl>0){
             newPNL = uint256(pnl);
+            newPNL = newPNL.div(10e12);
+            return wbtcPool + usdcPool - totalBorrowingFees - newPNL - impactPoolPrice;
         }
         else{
             newPNL = uint256(-pnl);
+            newPNL = newPNL.div(10e12);
+            return wbtcPool + usdcPool - totalBorrowingFees + newPNL - impactPoolPrice;
         }
-        newPNL = newPNL.div(10e12);
-        return wethPool + usdcPool - totalBorrowingFees - newPNL - impactPoolPrice;
     }
 
     receive() external payable{}
 }
+
+// struct MarketPoolValueInfoProps {
+//     int256 poolValue; 30297859937182975781353382593557078314
+//     int256 longPnl; -30256194486684016933915089809167659866
+//     int256 shortPnl; 57958940031103509964560000000000
+//     int256 netPnl; -30256136527743985830405125249167659866
+
+//     uint256 longTokenAmount; 177282026099
+//     uint256 shortTokenAmount; 72438845087601
+//     uint256 longTokenUsd; 7621624829125607562252570000000000
+//     uint256 shortTokenUsd; 72448675038879387455700000000000
+
+//     uint256 totalBorrowingFees; 54014820524637842323983133951457854
+//     uint256 borrowingFeePoolFactor; 630000000000000000000000000000n
+
+//     uint256 impactPoolAmount; 995561279n
+//   }117473871830231827571983404
