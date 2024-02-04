@@ -77,7 +77,7 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         totalAssetsAmount = totalAssetsAmount.sub(withdrawAmount);
 
         uniswapBtc.withdraw(uint128(uniswapWithdrawAmount));
-        gmxV2Btc.withdraw{value: gmxV2Btc.executionFee()}(gmxWithdrawAmount);
+        gmxV2Btc.withdraw{value: gmxV2Btc.executionFee()}(gmxWithdrawAmount, msg.sender);
         uint256 wbtcAmount = wbtcToken.balanceOf(address(this));
         wbtcToken.transfer(msg.sender, wbtcAmount);
         payable(msg.sender).transfer(address(this).balance);
@@ -88,22 +88,21 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     }
 
     function _compoundFees() internal {
-        // uint256 prevWethAmount = weth.balanceOf(address(this));
-        // stargateETH.compound();
-        // gmxV2ETH.compound();
-        // uint256 postWethAmount = weth.balanceOf(address(this));
-        // uint256 treasuryFee = (postWethAmount - prevWethAmount).mul(performanceFee).div(100);
-        // weth.withdraw(treasuryFee);
-        // payable(treasury).transfer(treasuryFee);
-        // uint256 wethAmount = postWethAmount - treasuryFee;
-        // uint256 stargateDepositAmount = wethAmount.mul(stargateAllocation).div(100);
-        // uint256 gmxDepositAmount = wethAmount.sub(stargateDepositAmount);
-        // totalAssetsAmount = totalAssetsAmount + wethAmount;
-        // weth.approve(address(stargateETH), stargateDepositAmount);
-        // stargateETH.deposit(stargateDepositAmount);
-        // weth.approve(address(gmxV2ETH), gmxDepositAmount);
-        // gmxV2ETH.deposit(gmxDepositAmount);
-        // lastCompoundTimestamp = block.timestamp;
+        uint256 prevWbtcAmount = wbtcToken.balanceOf(address(this));
+        uniswapBtc.compound(); // uniswap compound
+        gmxV2Btc.compound();
+        uint256 postWbtcAmount = wbtcToken.balanceOf(address(this));
+        uint256 treasuryFee = (postWbtcAmount - prevWbtcAmount).mul(performanceFee).div(100);
+        wbtcToken.transfer(treasury ,treasuryFee);
+        uint256 wbtcAmount = postWbtcAmount - treasuryFee;
+        uint256 uniswapDepositAmount = wbtcAmount.mul(uniswapAllocation).div(100);
+        uint256 gmxDepositAmount = wbtcAmount.sub(uniswapDepositAmount);
+        totalAssetsAmount = totalAssetsAmount + wbtcAmount;
+        wbtcToken.approve(address(uniswapBtc), uniswapDepositAmount);
+        uniswapBtc.deposit(uniswapDepositAmount);
+        wbtcToken.approve(address(gmxV2Btc), gmxDepositAmount);
+        gmxV2Btc.deposit(gmxDepositAmount);
+        lastCompoundTimestamp = block.timestamp;
     }
 
     function setAllocation(uint256 _gmxAllocation, uint256 _uniswapAllocation) public onlyOwner {
