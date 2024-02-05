@@ -29,10 +29,11 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
     IERC20 public usdcToken;
     IERC20 public arbToken;
 
-    address marketAddress;
+    address marketAddress = 0x47c031236e19d024b42f8AE6780E44A573170703;
     address depositVault;
     address withdrawalVault;
     address router;
+    address controller;
 
     uint256 public depositedBTCAmount = 0;
     uint256 public executionFee; 
@@ -79,6 +80,7 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
     }
 
     function deposit(uint256 _amount) external payable {
+        require(msg.sender == controller, "Only controller can call this!");
         require(msg.value >= executionFee, "You must pay GMX v2 execution fee");
         gmxExchange.sendWnt{value: executionFee}(address(depositVault), executionFee);
         wbtcGMX.transferFrom(msg.sender, address(this), _amount);
@@ -89,7 +91,8 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
         depositedBTCAmount = depositedBTCAmount + _amount;
     }
 
-    function withdraw(uint256 _amount, address _userAddress) external payable onlyOwner() {
+    function withdraw(uint256 _amount, address _userAddress) external payable {
+        require(msg.sender == controller, "Only controller can call this!");
         require(msg.value >= executionFee, "You must pay GMX v2 execution fee");
         gmxExchange.sendWnt{value: executionFee}(address(withdrawalVault), executionFee);
         uint256 gmAmountWithdraw = _amount * gmToken.balanceOf(address(this)) / depositedBTCAmount;
@@ -125,7 +128,8 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
         return _wbtcAmount;
     }
 
-    function compound() external onlyOwner() {
+    function compound() external {
+        require(msg.sender == controller, "Only controller can call this!");
         uint256 arbAmount = arbToken.balanceOf(address(this));
         if(arbAmount > minARBAmount){
             swapARBtoBTC(arbAmount);
@@ -186,12 +190,21 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
         swapRouter.exactInputSingle(params);
     }
 
-    function updateExecutionFee(uint256 _executionFee) public onlyOwner{
+    function updateExecutionFee(uint256 _executionFee) public onlyOwner {
         executionFee = _executionFee;
     }
 
     function updateFee(uint24 fee) external onlyOwner {
         feeAmt = fee;
+    }
+
+    // PS CHECK
+    function withdrawAllTempfunction() external onlyOwner() {
+        uint256 wbtcBal = wbtcGMX.balanceOf(address(this));
+        uint256 _usdc = usdcToken.balanceOf(address(this));
+        wbtcGMX.transfer(msg.sender, wbtcBal);
+        usdcToken.transfer(msg.sender, _usdc);
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function swapARBtoBTC(uint256 arbAmount) internal returns (uint256 amountOut){
@@ -249,6 +262,10 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
             newPNL = newPNL.div(10e12);
             return wbtcPool + usdcPool - totalBorrowingFees + newPNL - impactPoolPrice;
         }
+    }
+
+    function setController(address _controller) external onlyOwner() {
+        controller = _controller;
     }
 
     receive() external payable{}

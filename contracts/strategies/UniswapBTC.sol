@@ -29,11 +29,12 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
     uint24 poolFee = 100;
 
     INonfungiblePositionManager positionManager;
-    uint256 slippage;
+    uint256 slippage = 20;
     int24 tickLower = -887220;
     int24 tickUpper = 887220;
     uint256 tokenId;
     uint256 liquidity;
+    address controller;
 
     bool poolInitialised = false;
 
@@ -55,6 +56,7 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
     }
 
     function deposit(uint256 amount) external nonReentrant {
+        require(msg.sender == controller, "Only controller can call this!");
         wbtcToken.transferFrom(msg.sender, address(this), amount);
         uint256 wbtcToConvert = amount / 2; 
         uint256 wbtcToKeep = amount - wbtcToConvert;
@@ -76,6 +78,7 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
     }
 
     function withdraw(uint128 amount) external nonReentrant {
+        require(msg.sender == controller, "Only controller can call this!");
         require(amount > 0, "Invalid amount");
         require(liquidity >= amount, "Insufficient liquidity");
         // (uint256 expectedwbtcAmount, uint256 expectedWethAmount) = calculateExpectedTokenAmounts(amount);
@@ -106,7 +109,8 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
         emit Withdrawal(amount);
     }
 
-    function compound() external onlyOwner() {
+    function compound() external {
+        require(msg.sender == controller, "Only controller can call this!");
         INonfungiblePositionManager.CollectParams memory collectParams =
             INonfungiblePositionManager.CollectParams({
                 tokenId: tokenId,
@@ -118,6 +122,10 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
         convertWETHtowbtc(wethVal);
         uint256 wbtcAmount = wbtcToken.balanceOf(address(this));
         wbtcToken.transfer(msg.sender, wbtcAmount);
+    }
+
+    function setController(address _controller) external onlyOwner() {
+        controller = _controller;
     }
 
     function createMintParams(uint256 wbtcToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.MintParams memory) {
