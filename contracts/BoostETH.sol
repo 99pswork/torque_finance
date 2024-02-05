@@ -147,12 +147,12 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         }
     }
 
-    // Remove for prod deployment
+    // PS CHECK Remove for prod deployment
     function updateStargate(address payable _address) external onlyOwner {
         stargateETH = StargateETH(_address);
     }
 
-    // Remove for prod deployment
+    // PS CHECK Remove for prod deployment
     function updateGMXV2(address payable _address) external onlyOwner {
         gmxV2ETH = GMXV2ETH(_address);
     }

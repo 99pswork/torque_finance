@@ -120,7 +120,7 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
         wbtcToken.transfer(msg.sender, wbtcAmount);
     }
 
-    function createMintParams(uint256 wbtcToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal returns (INonfungiblePositionManager.MintParams memory) {
+    function createMintParams(uint256 wbtcToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.MintParams memory) {
         return INonfungiblePositionManager.MintParams({
             token0: address(wbtcToken),
             token1: address(wethToken),
@@ -136,7 +136,7 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
         });
     }
 
-    function createIncreaseLiquidityParams(uint256 wbtcToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal returns (INonfungiblePositionManager.IncreaseLiquidityParams memory) {
+    function createIncreaseLiquidityParams(uint256 wbtcToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.IncreaseLiquidityParams memory) {
         return INonfungiblePositionManager.IncreaseLiquidityParams({
             tokenId: tokenId,
             amount0Desired: wbtcToKeep,
@@ -169,10 +169,10 @@ contract UniswapBTC is Ownable, ReentrancyGuard {
         poolFee = _poolFee;
     }
 
-    function calculateExpectedTokenAmounts(uint256 liquidityAmount) internal view returns (uint256 expectedwbtcAmount, uint256 expectedWethAmount) {
-        // Calculate the expected amount of WBTC and WETH tokens to receive
-        return (0, 0);
-    }
+    // function calculateExpectedTokenAmounts(uint256 liquidityAmount) internal view returns (uint256 expectedwbtcAmount, uint256 expectedWethAmount) {
+    //     // Calculate the expected amount of WBTC and WETH tokens to receive
+    //     return (0, 0);
+    // }
 
     function convertwbtctoWETH(uint256 wbtcAmount) internal returns (uint256) {
         wbtcToken.approve(address(swapRouter), wbtcAmount);
