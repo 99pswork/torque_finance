@@ -128,8 +128,7 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
         require(msg.sender == controller, "Only controller can call this!");
         uint256 arbAmount = arbToken.balanceOf(address(this));
         if(arbAmount > minARBAmount){
-            swapARBtoBTC(arbAmount);
-            uint256 wbtcVal = wbtcGMX.balanceOf(address(this));
+            uint256 wbtcVal = swapARBtoBTC(arbAmount);
             wbtcGMX.transfer(msg.sender, wbtcVal);
         }
     }
