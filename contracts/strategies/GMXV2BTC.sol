@@ -47,6 +47,8 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
     mapping (address => uint256) public usdcAmount;
     mapping (address => uint256) public wbtcAmount;
 
+    address public treasury = 0x0f773B3d518d0885DbF0ae304D87a718F68EEED5;
+
     address dataStore = 0xFD70de6b91282D8017aA4E741e9Ae325CAb992d8;
     IChainlinkOracle chainlinkOracle = IChainlinkOracle(0xb6C62D5EB1F572351CC66540d043EF53c4Cd2239);
     ISyntheticReader syntheticReader = ISyntheticReader(0xf60becbba223EEA9495Da3f606753867eC10d139);
@@ -190,7 +192,11 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
     }
 
     function withdrawTreasuryFees() external onlyOwner() {
-        payable(msg.sender).transfer(address(this).balance);
+        payable(treasury).transfer(address(this).balance);
+    }
+
+    function setTreasury(address _treasury) public onlyOwner {
+        treasury = _treasury;
     }
 
     function swapARBtoBTC(uint256 arbAmount) internal returns (uint256 amountOut){
