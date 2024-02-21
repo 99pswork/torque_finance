@@ -189,12 +189,7 @@ contract GMXV2BTC is Ownable, ReentrancyGuard {
         feeAmt = fee;
     }
 
-    // PS CHECK
-    function withdrawAllTempfunction() external onlyOwner() {
-        uint256 wbtcBal = wbtcGMX.balanceOf(address(this));
-        uint256 _usdc = usdcToken.balanceOf(address(this));
-        wbtcGMX.transfer(msg.sender, wbtcBal);
-        usdcToken.transfer(msg.sender, _usdc);
+    function withdrawTreasuryFees() external onlyOwner() {
         payable(msg.sender).transfer(address(this).balance);
     }
 

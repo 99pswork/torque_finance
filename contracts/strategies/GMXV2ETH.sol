@@ -118,16 +118,7 @@ contract GMXV2ETH is Ownable, ReentrancyGuard {
         return _wethAmount;
     }
 
-    function withdrawETH() external onlyOwner() {
-        payable(msg.sender).transfer(address(this).balance);
-    }
-
-    // PS CHECK To be removed Temporary function
-    function withdrawAllTempfunction() external onlyOwner() {
-        uint256 _weth = weth.balanceOf(address(this));
-        uint256 _usdc = usdcToken.balanceOf(address(this));
-        weth.transfer(msg.sender, _weth);
-        usdcToken.transfer(msg.sender, _usdc);
+    function withdrawTreasuryFees() external onlyOwner() {
         payable(msg.sender).transfer(address(this).balance);
     }
 
