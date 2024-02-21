@@ -82,11 +82,6 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function withdrawGMXETHFee() external onlyOwner() {
-        gmxV2ETH.withdrawETH();
-        payable(msg.sender).transfer(address(this).balance);
-    }
-
     function totalAssets() public view returns (uint256) {
         return totalAssetsAmount;
     }
