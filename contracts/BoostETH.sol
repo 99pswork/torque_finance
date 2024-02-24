@@ -21,6 +21,11 @@ import "./interfaces/IWETH9.sol";
 import "./strategies/GMXV2ETH.sol";
 import "./strategies/StargateETH.sol";
 
+interface RewardsUtil {
+    function userDepositReward(address _userAddress, uint256 _depositAmount) external;
+    function userWithdrawReward(address _userAddress, uint256 _withdrawAmount) external;
+}
+
 contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     using SafeMath for uint256;
     using Math for uint256;
@@ -28,6 +33,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     IWETH9 public weth;
     GMXV2ETH public gmxV2ETH;
     StargateETH public stargateETH;
+    RewardsUtil public rewardsUtil;
     address public treasury;
 
     uint256 public gmxAllocation;
@@ -38,11 +44,12 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     
     uint256 public totalAssetsAmount;
 
-    constructor(string memory _name, string memory _symbol, address payable weth_, address payable gmxV2ETH_, address payable stargateETH_, address treasury_) ERC20(_name, _symbol) Ownable(msg.sender) {
+    constructor(string memory _name, string memory _symbol, address payable weth_, address payable gmxV2ETH_, address payable stargateETH_, address treasury_, address _rewardsUtil) ERC20(_name, _symbol) Ownable(msg.sender) {
         weth = IWETH9(weth_);
         gmxV2ETH = GMXV2ETH(gmxV2ETH_);
         stargateETH = StargateETH(stargateETH_);
         treasury = treasury_;
+        rewardsUtil = RewardsUtil(_rewardsUtil);
         gmxAllocation = 50;
         stargateAllocation = 50;
         performanceFee = 10;
@@ -65,6 +72,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         _mint(msg.sender, shares);
         totalAssetsAmount = totalAssetsAmount.add(depositAmount);
         payable(msg.sender).transfer(address(this).balance);
+        rewardsUtil.userDepositReward(msg.sender, shares);
     }
 
     function withdrawETH(uint256 sharesAmount) external payable nonReentrant() {
@@ -80,6 +88,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         uint256 wethAmount = weth.balanceOf(address(this));
         weth.transfer(msg.sender, wethAmount);
         payable(msg.sender).transfer(address(this).balance);
+        rewardsUtil.userWithdrawReward(msg.sender, sharesAmount);
     }
 
     function totalAssets() public view returns (uint256) {

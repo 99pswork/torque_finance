@@ -19,6 +19,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./strategies/GMXV2BTC.sol";
 import "./strategies/UniswapBTC.sol";
 
+interface RewardsUtil {
+    function userDepositReward(address _userAddress, uint256 _depositAmount) external;
+    function userWithdrawReward(address _userAddress, uint256 _withdrawAmount) external;
+}
+
 contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using Math for uint256;
@@ -27,6 +32,7 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     GMXV2BTC public gmxV2Btc;
     UniswapBTC public uniswapBtc;
     address public treasury;
+    RewardsUtil public rewardsUtil;
 
     uint256 public gmxAllocation;
     uint256 public uniswapAllocation;
@@ -42,7 +48,8 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     address wBTC,
     address payable _gmxV2BtcAddress,
     address _uniswapBtcAddress,
-    address _treasury
+    address _treasury,
+    address _rewardsUtil
     ) ERC20(_name, _symbol) Ownable(msg.sender) {
         wbtcToken = IERC20(wBTC);
         gmxV2Btc = GMXV2BTC(_gmxV2BtcAddress);
@@ -50,6 +57,7 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         gmxAllocation = 50;
         uniswapAllocation = 50;
         treasury = _treasury;
+        rewardsUtil = RewardsUtil(_rewardsUtil);
     }
 
     function depositBTC(uint256 depositAmount) external payable nonReentrant() {
@@ -67,6 +75,7 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         _mint(msg.sender, shares);
         totalAssetsAmount = totalAssetsAmount.add(depositAmount);
         payable(msg.sender).transfer(address(this).balance);
+        rewardsUtil.userDepositReward(msg.sender, shares);
     }
 
     function withdrawBTC(uint256 sharesAmount) external payable nonReentrant() {
@@ -83,6 +92,7 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         uint256 wbtcAmount = wbtcToken.balanceOf(address(this));
         wbtcToken.transfer(msg.sender, wbtcAmount);
         payable(msg.sender).transfer(address(this).balance);
+        rewardsUtil.userWithdrawReward(msg.sender, sharesAmount);
     }
 
     function compoundFees() external nonReentrant(){
