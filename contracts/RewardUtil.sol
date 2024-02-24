@@ -73,12 +73,12 @@ contract RewardUtil is ReentrancyGuard, Ownable {
         }
     }
 
-    function setrewardFactor(address torqueContract, uint256 _rewardFactor) public onlyOwner() {
+    function setrewardFactor(address torqueContract, uint256 _rewardFactor) public onlyGovernor() {
         rewardConfig[torqueContract].rewardFactor = _rewardFactor;
         emit RewardFactorUpdated(torqueContract, _rewardFactor);
     }
 
-    function setTorquePool(address _torqueContract, uint256 _poolAmount) public onlyOwner() {
+    function setTorquePool(address _torqueContract, uint256 _poolAmount) public onlyGovernor() {
         rewardConfig[_torqueContract].torquePool = _poolAmount;
         emit TorquePoolUpdated(_torqueContract, _poolAmount);
     }
