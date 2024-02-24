@@ -106,7 +106,7 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         wbtcToken.approve(address(uniswapBtc), uniswapDepositAmount);
         uniswapBtc.deposit(uniswapDepositAmount);
         wbtcToken.approve(address(gmxV2Btc), gmxDepositAmount);
-        gmxV2Btc.deposit(gmxDepositAmount);
+        gmxV2Btc.deposit(gmxDepositAmount); // PS FIX
         lastCompoundTimestamp = block.timestamp;
     }
 

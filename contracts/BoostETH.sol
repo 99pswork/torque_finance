@@ -118,7 +118,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         weth.approve(address(stargateETH), stargateDepositAmount);
         stargateETH.deposit(stargateDepositAmount);
         weth.approve(address(gmxV2ETH), gmxDepositAmount);
-        gmxV2ETH.deposit(gmxDepositAmount);
+        gmxV2ETH.deposit(gmxDepositAmount); // PS FIX
         lastCompoundTimestamp = block.timestamp;
     }
 
