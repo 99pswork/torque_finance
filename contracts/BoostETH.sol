@@ -42,6 +42,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     uint256 public performanceFee;
     uint256 public minWethAmount = 4000000000000000;
     uint256 public compoundWethAmount = 0;
+    uint256 public treasuryFee = 0;
     
     uint256 public totalAssetsAmount;
 
@@ -60,8 +61,9 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
 
     function depositETH(uint256 depositAmount) external payable nonReentrant() {
         require(msg.value > 0, "You must pay GMX v2 execution fee");
-        weth.transferFrom(msg.sender, address(this), depositAmount);
+        require(weth.balanceOf(address(this)) >= compoundWethAmount, "Insufficient compound balance");
         
+        weth.transferFrom(msg.sender, address(this), depositAmount);
         uint256 depositAndCompound = depositAmount + compoundWethAmount;
         compoundWethAmount = 0;
         uint256 stargateDepositAmount = depositAndCompound.mul(stargateAllocation).div(100);
@@ -85,10 +87,12 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         uint256 gmxWithdrawAmount = withdrawAmount.sub(stargateWithdrawAmount);
         _burn(msg.sender, sharesAmount);
         totalAssetsAmount = totalAssetsAmount.sub(withdrawAmount);
-
+       
+        uint256 prevWethAmount = weth.balanceOf(address(this));
         stargateETH.withdraw(stargateWithdrawAmount);
         gmxV2ETH.withdraw{value: msg.value}(gmxWithdrawAmount, msg.sender);
-        uint256 wethAmount = weth.balanceOf(address(this));
+        uint256 postWethAmount = weth.balanceOf(address(this));
+        uint256 wethAmount = postWethAmount - prevWethAmount;
         weth.transfer(msg.sender, wethAmount);
         rewardsUtil.userWithdrawReward(msg.sender, sharesAmount);
     }
@@ -116,10 +120,13 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         stargateETH.compound();
         gmxV2ETH.compound();
         uint256 postWethAmount = weth.balanceOf(address(this));
-        uint256 treasuryFee = (postWethAmount - prevWethAmount).mul(performanceFee).div(100);
-        weth.withdraw(treasuryFee);
-        payable(treasury).transfer(treasuryFee);
-        uint256 wethAmount = postWethAmount - treasuryFee;
+        uint256 treasuryAmount = (postWethAmount - prevWethAmount).mul(performanceFee).div(1000);
+        treasuryFee = treasuryFee.add(treasuryAmount);
+        if(treasuryFee >= minWethAmount){
+            weth.transfer(treasury, treasuryFee);
+            treasuryFee = 0;
+        }
+        uint256 wethAmount = postWethAmount - prevWethAmount - treasuryAmount;
         compoundWethAmount += wethAmount;
         lastCompoundTimestamp = block.timestamp;
     }
@@ -135,12 +142,16 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     }
 
     function setPerformanceFee(uint256 _performanceFee) public onlyOwner {
-        require(_performanceFee <= 100, "Treasury Fee can't be more than 100%");
+        require(_performanceFee <= 1000, "Treasury Fee can't be more than 100%");
         performanceFee = _performanceFee;
     }
 
     function setTreasury(address _treasury) public onlyOwner {
         treasury = _treasury;
+    }
+
+    function withdrawTreasuryFees() external onlyOwner() {
+        payable(treasury).transfer(address(this).balance);
     }
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
