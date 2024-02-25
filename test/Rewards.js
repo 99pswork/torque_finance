@@ -41,8 +41,8 @@ const {
 
         it("Should authorize contract", async function () {
             const _amount = await ethers.parseUnits('10', 10);
-            await rewardContract.setDistributionContract(owner,_amount,_amount);
-            expect(await rewardContract.distributionContract(owner)).to.equal(true);
+            await rewardContract.addTorqueContract(owner,_amount,_amount);
+            expect(await rewardContract.isTorqueContract(owner)).to.equal(true);
         });
 
         it("Should get Reward Config ", async function () {
