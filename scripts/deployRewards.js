@@ -28,3 +28,5 @@ deployRewardsUtilContract().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+// npx hardhat verify --network arbitrum 0x7fbEc73497dd2E3DDAD077aFeF82D2F739D5DaFF "0xb56C29413AF8778977093B9B4947efEeA7136C36" "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01" 
