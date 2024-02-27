@@ -59,6 +59,7 @@ contract RewardUtil is ReentrancyGuard, Ownable {
     modifier onlyGovernor() {
         if (msg.sender != governor) revert NotPermitted(msg.sender);
         _;
+
     }
 
     function userDepositReward(address _userAddress, uint256 _depositAmount) external {
@@ -175,6 +176,10 @@ contract RewardUtil is ReentrancyGuard, Ownable {
 
     function pauseClaims(bool _pause) external onlyGovernor {
         claimsPaused = _pause;
+    }
+
+    function withdrawTorque(uint256 _amount) external onlyOwner() {
+        torqToken.transfer(msg.sender, _amount);
     }
 
     function getRewardConfig(address _torqueContract, address _user) public view returns (UserRewardConfig memory){
