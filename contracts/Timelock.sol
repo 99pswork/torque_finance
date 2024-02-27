@@ -15,11 +15,11 @@ contract Timelock {
     event QueueTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature, bytes data, uint eta);
 
     uint public immutable GRACE_PERIOD = 14 days;
-    // uint public immutable MINIMUM_DELAY = 2 days; // Revert before main deployment
-    // uint public immutable MAXIMUM_DELAY = 10 days; // Revert before main deployment
+    uint public immutable MINIMUM_DELAY = 2 days; // Revert before main deployment
+    uint public immutable MAXIMUM_DELAY = 10 days; // Revert before main deployment
 
-    uint public immutable MINIMUM_DELAY = 2 minutes; // remove
-    uint public immutable MAXIMUM_DELAY = 30 minutes; // remove
+    // uint public immutable MINIMUM_DELAY = 2 minutes; // remove
+    // uint public immutable MAXIMUM_DELAY = 30 minutes; // remove
 
     address public admin;
     address public pendingAdmin;
@@ -27,7 +27,7 @@ contract Timelock {
 
     mapping (bytes32 => bool) public queuedTransactions;
 
-    constructor(address admin_, uint delay_) public {
+    constructor(address admin_, uint delay_) {
         require(delay_ >= MINIMUM_DELAY, "Timelock::constructor: Delay must exceed minimum delay.");
         require(delay_ <= MAXIMUM_DELAY, "Timelock::setDelay: Delay must not exceed maximum delay.");
 
