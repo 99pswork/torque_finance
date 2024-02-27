@@ -59,7 +59,6 @@ contract RewardUtil is ReentrancyGuard, Ownable {
     modifier onlyGovernor() {
         if (msg.sender != governor) revert NotPermitted(msg.sender);
         _;
-
     }
 
     function userDepositReward(address _userAddress, uint256 _depositAmount) external {
