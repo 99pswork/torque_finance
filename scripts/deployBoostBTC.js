@@ -6,8 +6,7 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 let boostWBTCAddress;
-
-// npx hardhat verify --network arbitrum 0x8E786Ca3f951549dEE4D0741a23E1f1f29E9245e "Torque BTC" "tBTC" "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f" "0x9c1756e84030096d2Ea08fa189a69161Dd51AA30" "0x63e6E5701646d02931143df7141352F180fa46ed" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x7fbEc73497dd2E3DDAD077aFeF82D2F739D5DaFF"
+// npx hardhat verify --network arbitrum 0x8183EA6651233dd53CED91f3d5c840624940dC37 "Torque BTC" "tBTC" "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f" "0x9c1756e84030096d2Ea08fa189a69161Dd51AA30" "0x63e6E5701646d02931143df7141352F180fa46ed" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0xB2f0C2856cb348Fd0396EbfB734adD7E31d9aF8e"
 async function deployBoostWBTCContract() {
 
   const BoostWBTC = await hre.ethers.getContractFactory("BoostBTC");
@@ -20,7 +19,7 @@ async function deployBoostWBTCContract() {
     "0x9c1756e84030096d2Ea08fa189a69161Dd51AA30",
     "0x63e6E5701646d02931143df7141352F180fa46ed",
     "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
-    "0x7fbEc73497dd2E3DDAD077aFeF82D2F739D5DaFF"); // Pass constructor Arguments 
+    "0xB2f0C2856cb348Fd0396EbfB734adD7E31d9aF8e"); // Pass constructor Arguments 
   }
   catch (error) {
     console.error("Error deploying Boost WBTC:", error.message);

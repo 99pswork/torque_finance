@@ -5,7 +5,11 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+// 1 TORQ / Day for 2000 WBTC
+//288000*2000*1000000000000000000000000/576000000000000 = 1 TORQ / DAY
 
+// 1 TORQ / Day for 300000000000000 WETH
+//288000*300000000000000*1000000000000000000000000/86400000000000000000000000
 async function deployRewardsUtilContract() {
 
   const RewardsUtil = await hre.ethers.getContractFactory("RewardUtil");
@@ -29,4 +33,4 @@ deployRewardsUtilContract().catch((error) => {
   process.exitCode = 1;
 });
 
-// npx hardhat verify --network arbitrum 0x7fbEc73497dd2E3DDAD077aFeF82D2F739D5DaFF "0xb56C29413AF8778977093B9B4947efEeA7136C36" "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01" 
+// npx hardhat verify --network arbitrum 0x02084cF8254BB18Fb5e38D39DCE68b03778f7365 "0xb56C29413AF8778977093B9B4947efEeA7136C36" "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01" 
