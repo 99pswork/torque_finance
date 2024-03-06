@@ -4,6 +4,7 @@ const CONFIG = require("./credentials.json");
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
+    viaIR: true,
     version: "0.8.19",
     settings: {
       optimizer: {
