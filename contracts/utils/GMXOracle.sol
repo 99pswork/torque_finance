@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
-import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
-import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import { ISyntheticReader } from "../interfaces/ISyntheticReader.sol";
 import { IChainlinkOracle } from "../interfaces/IChainlinkOracle.sol";
 import { Errors } from "./Errors.sol";
-
-import { console } from "./console.sol";
 
 contract GMXOracle {
 
