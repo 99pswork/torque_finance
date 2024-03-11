@@ -4,14 +4,35 @@ const CONFIG = require("./credentials.json");
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    viaIR: true,
-    version: "0.8.19",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200, // Adjust the number of runs as needed
+    compilers: [
+      {
+        version: "0.8.19",
+        viaIR: true,
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200, // Adjust the number of runs as needed
+          },
+        },
       },
-    },
+      {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200, // Adjust the number of runs as needed
+          },
+        },
+      },
+    ],
+    viaIR: true,
+    // version: "0.8.19",
+    // settings: {
+    //   optimizer: {
+    //     enabled: true,
+    //     runs: 200, // Adjust the number of runs as needed
+    //   },
+    // },
   },
   networks: {
     arbitrum: {

@@ -34,4 +34,4 @@ deployRewardsUtilContract().catch((error) => {
   process.exitCode = 1;
 });
 
-// npx hardhat verify --network arbitrum 0x1918C959c8a43A845ed08799DC22c1Ed7dAD1651 "0xb56C29413AF8778977093B9B4947efEeA7136C36" "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01" 
+// npx hardhat verify --network arbitrum 0x36A04745c615722f369b2Fd2B3F719f1a611F7cA "0xb56C29413AF8778977093B9B4947efEeA7136C36" "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01" 
