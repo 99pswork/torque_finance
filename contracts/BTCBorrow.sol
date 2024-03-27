@@ -80,7 +80,7 @@ contract BTCBorrow is BorrowAbstract {
         bytes memory withdrawAssetCalldata = abi.encode(comet, address(this), baseAsset, borrowAmountUSDC);
         callData[1] = withdrawAssetCalldata;
         
-        // Interactions
+        // Interactionssc
         IERC20(asset).approve(comet, supplyAmount);
         IBulker(bulker).invoke(buildBorrowAction(), callData);
         IERC20(baseAsset).approve(address(engine), borrowAmountUSDC);

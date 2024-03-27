@@ -10,16 +10,13 @@ pragma solidity 0.8.19;
 //       \ \__\ \ \_______\ \__\\ _\\ \_____  \ \_______\ \_______\
 //        \|__|  \|_______|\|__|\|__|\|___| \__\|_______|\|_______|
 
-
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract SwapTorqueToken is Ownable {
-    ISwapRouter private constant router =
-        ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+    ISwapRouter private constant router = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     address public treasury;
     uint performanceFee = 10;
