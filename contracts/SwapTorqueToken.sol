@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-
 //  _________  ________  ________  ________  ___  ___  _______
 // |\___   ___\\   __  \|\   __  \|\   __  \|\  \|\  \|\  ___ \
 // \|___ \  \_\ \  \|\  \ \  \|\  \ \  \|\  \ \  \\\  \ \   __/|
@@ -20,13 +19,12 @@ contract SwapTorqueToken is Ownable {
 
     address public treasury;
     uint performanceFee = 10;
-    uint24 swapFee = 200;
 
     constructor(address _treasury) Ownable(msg.sender) {
         treasury = _treasury;
     }
 
-    function swapExactInputSingleHop(uint amountIn, uint amountOutMin, address _tokenIn, address _tokenOut)
+    function swapExactInputSingleHop(uint amountIn, uint amountOutMin, uint24 _swapFee, address _tokenIn, address _tokenOut)
         external
     {
         IERC20 tokenIn = IERC20(_tokenIn);
@@ -42,7 +40,7 @@ contract SwapTorqueToken is Ownable {
             .ExactInputSingleParams({
                 tokenIn: _tokenIn,
                 tokenOut: _tokenOut,
-                fee: swapFee,
+                fee: _swapFee,
                 recipient: msg.sender,
                 deadline: block.timestamp,
                 amountIn: amountIn,
@@ -54,9 +52,5 @@ contract SwapTorqueToken is Ownable {
 
     function updatePerformanceFee(uint _fee) external onlyOwner {
         performanceFee = _fee;
-    }
-
-    function updateSwapFee(uint24 _swapFee) external onlyOwner {
-        swapFee = _swapFee;
     }
 }

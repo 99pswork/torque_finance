@@ -4,6 +4,13 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
+
+// - WBTC/WETH, SWAP FEE 3000
+// - USDC/WETH, SWAP FEE 3000
+// - USDC/TUSD, SWAP FEE 100
+// - TORQ/WETH, SWAP FEE 3000
+
+
 const hre = require("hardhat");
 // npx hardhat verify --network arbitrum 0xea15bd7a9382fA7dcDED328cBBCFDEC6c397c531 "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01"
 async function deploySwapTorqueToken() {
