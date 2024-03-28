@@ -18,7 +18,7 @@ contract SwapTorqueToken is Ownable {
     ISwapRouter private constant router = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     address public treasury;
-    uint performanceFee = 10;
+    uint TorqueSwapFee = 10;
 
     constructor(address _treasury) Ownable(msg.sender) {
         treasury = _treasury;
@@ -29,7 +29,7 @@ contract SwapTorqueToken is Ownable {
     {
         IERC20 tokenIn = IERC20(_tokenIn);
         
-        uint256 swapFeeAmt = amountIn*performanceFee/1000;
+        uint256 swapFeeAmt = amountIn*TorqueSwapFee/1000;
         require(tokenIn.transferFrom(msg.sender, treasury, swapFeeAmt), "TX Failed!");
         
         amountIn = amountIn - swapFeeAmt;
@@ -50,7 +50,7 @@ contract SwapTorqueToken is Ownable {
         router.exactInputSingle(params);
     }
 
-    function updatePerformanceFee(uint _fee) external onlyOwner {
-        performanceFee = _fee;
+    function updateTorqueSwapFee(uint _fee) external onlyOwner {
+        TorqueSwapFee = _fee;
     }
 }
