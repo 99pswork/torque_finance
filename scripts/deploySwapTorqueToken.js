@@ -12,7 +12,7 @@
 
 
 const hre = require("hardhat");
-// npx hardhat verify --network arbitrum 0xC6d9a406cB7A72381eF3E33A86BeFEc2dbf05b1F "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01"
+// npx hardhat verify --network arbitrum 0x6e38a9f0150C83d9A2db441F92F2A0B892C3464A "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01"
 async function deploySwapTorqueToken() {
 
   const SwapTorque = await hre.ethers.getContractFactory("SwapTorqueToken");

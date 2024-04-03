@@ -1,0 +1,24 @@
+TUSD --> WBTC // Multi HOP TUSD -> USDC 0.01% , USDC -> WBTC 0.05%
+TUSD --> USDC // Single HOP 
+TUSD --> WETH // Multi HOP TUSD -> USDC 0.01% , USDC -> WETH 0.05%
+TUSD --> TORQ // Uniswap Not Allowing 
+
+USDC --> TUSD // Single HOP
+USDC --> WBTC // Single HOP
+USDC --> WETH // Single HOP
+USDC --> TORQ // Multi HOP USDC --> WETH 0.05%, WETH --> TORQ 0.3%
+
+WBTC --> TUSD // Multi HOP WBTC -> USDC 0.05%, USDC --> TUSD 0.01%
+WBTC --> USDC // Single HOP
+WBTC --> WETH // Single HOP
+WBTC --> TORQ // Multi HOP WBTC --> WETH 0.05%, WETH --> TORQ 0.3%
+
+WETH --> TUSD // Multi HOP WETH --> USDC 0.05%, USDC --> TUSD 0.01%
+WETH --> USDC // Single HOP
+WETH --> WBTC // Single HOP
+WETH --> TORQ // Single HOP
+
+TORQ --> TUSD // Uniswap not allowing insufficient liquidity
+TORQ --> USDC // Multi HOP TORQ --> WETH 0.3%, WETH --> USDC 0.3%
+TORQ --> WBTC // Multi HOP TORQ --> WETH 0.3%, WETH --> WBTC 0.05%
+TORQ --> WETH // Single HOP
