@@ -12,20 +12,20 @@
 
 
 const hre = require("hardhat");
-// npx hardhat verify --network arbitrum 0xcE0C0E633086E4Bd3B2b4298D16b504490534411 "0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01"
-async function deploySwapTorqueToken() {
+// npx hardhat verify --network arbitrum 0xcE0C0E633086E4Bd3B2b4298D16b504490534411 "0xC36442b4a4522E871399CD717aBDD847Ab11FE88" "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"
+async function deployTorqueSelfCompoundor() {
 
-  const SwapTorque = await hre.ethers.getContractFactory("SwapTorqueToken");
+  const SwapTorque = await hre.ethers.getContractFactory("TorqueSelfCompoundor");
   let swapTorque;
-  console.log("SwapTorque factory created.");
+  console.log("Torque compounding factory created.");
   try{
-    swapTorque = await SwapTorque.deploy("0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01");
+    swapTorque = await SwapTorque.deploy("0xC36442b4a4522E871399CD717aBDD847Ab11FE88", "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45");
   }
   catch (error) {
-    console.error("Error deploying SwapTorque:", error);
+    console.error("Error deploying Torque Compounder:", error);
     process.exit(1);
   }
-  console.log("SwapTorque Contract Address", swapTorque.target);
+  console.log("Torque Compounder: Contract Address", swapTorque.target);
   return swapTorque;
 }
 

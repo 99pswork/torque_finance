@@ -12,7 +12,6 @@ pragma solidity 0.8.19;
 import "./interfaces/IComet.sol";
 import "./interfaces/IBulker.sol";
 import "./interfaces/ICometRewards.sol";
-import "./interfaces/ITUSDEngine.sol";
 import "./interfaces/ITokenDecimals.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -20,7 +19,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
+abstract contract SimpleBorrowAbstract is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
 
     address public comet;
@@ -28,10 +27,9 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
     address public asset;
     address public baseAsset;
     address public bulker;
-    address public engine;
-    address public tusd;
     address public treasury;
     address public controller;
+    
     uint public claimPeriod;
     uint public repaySlippage;
     uint public lastClaimCometTime;
@@ -47,20 +45,13 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
     bytes32 public constant ACTION_WITHDRAW_ETH = "ACTION_WITHDRAW_NATIVE_TOKEN";
     bytes32 public constant ACTION_CLAIM_REWARD = "ACTION_CLAIM_REWARD";
 
-    uint256 LIQUIDATION_THRESHOLD;
-    uint256 PRECISION;
-    uint256 LIQUIDATION_PRECISION;
-    uint256 MIN_HEALTH_FACTOR;
-
     constructor(
         address _initialOwner,
         address _comet, // Compound V3 Address
         address _cometReward, // Address for Claiming Comet Rewards
         address _asset, // Collateral to be staked (WBTC / WETH)
         address _baseAsset, // Borrowing Asset (USDC)
-        address _bulker, // Bulker Contract
-        address _engine, // Torque USD Engine 
-        address _tusd, // TUSD Token
+        address _bulker, // Bulker Contract 
         address _treasury, // Fees Address
         address _controller,
         uint _repaySlippage // Slippage %
@@ -71,14 +62,11 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
         asset = _asset;
         baseAsset = _baseAsset;
         bulker = _bulker;
-        engine = _engine;
-        tusd = _tusd;
         treasury = _treasury;
         IComet(_comet).allow(_bulker, true);
         claimPeriod = 86400; // 1 day in seconds
         repaySlippage = _repaySlippage;
         controller = _controller;
-        fetchValues();
     }
     
     uint constant BASE_ASSET_MANTISA = 1e6;
@@ -88,7 +76,6 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
     uint constant TUSD_DECIMAL_OFFSET = 1e12;
     uint constant PRICE_SCALE = 1e8;
 
-    uint public baseBorrowed; // TUSD borrowed 
     uint public borrowed; // USDC Borrowed 
     uint public supplied; // WBTC Supplied
     uint public borrowTime; // Borrow time
@@ -96,44 +83,10 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
     event UserBorrow(address user, address collateralAddress, uint amount);
     event UserRepay(address user, address collateralAddress, uint repayAmount, uint claimAmount);
 
-    function fetchValues() public {
-        LIQUIDATION_THRESHOLD = ITUSDEngine(engine).getLiquidationThreshold();
-        PRECISION = ITUSDEngine(engine).getPrecision();
-        LIQUIDATION_PRECISION = ITUSDEngine(engine).getLiquidationPrecision();
-        MIN_HEALTH_FACTOR = ITUSDEngine(engine).getMinHealthFactor();
-    }
-
     function getCollateralFactor() public view returns (uint){
         IComet icomet = IComet(comet);
         IComet.AssetInfo memory info = icomet.getAssetInfoByAddress(asset);
         return info.borrowCollateralFactor;
-    }
-
-    function getUserBorrowable() public view returns (uint){
-        if(supplied == 0) {
-            return 0; 
-        }
-        uint assetSupplyAmount = supplied;
-        uint maxUsdc = getBorrowableUsdc(assetSupplyAmount);
-        uint maxTusd = getBorrowableV2(maxUsdc); 
-        return maxTusd;
-    }
-
-    function getBorrowableV2(uint maxUSDC) public view returns (uint){
-        uint mintable = getMintableToken(maxUSDC, baseBorrowed, 0);
-        return mintable;
-    }
-    
-    function getBorrowableUsdc(uint supplyAmount) public view returns (uint) {
-        IComet icomet = IComet(comet);
-        IComet.AssetInfo memory info = icomet.getAssetInfoByAddress(asset);
-        uint assetDecimal = ITokenDecimals(asset).decimals();
-        return supplyAmount
-            .mul(info.borrowCollateralFactor)
-            .mul(icomet.getPrice(info.priceFeed))
-            .div(PRICE_MANTISA)
-            .div(10**assetDecimal)
-            .div(SCALE);
     }
 
     function withdraw(address _address, uint withdrawAmount) public nonReentrant() {
@@ -199,43 +152,18 @@ abstract contract BorrowAbstract is Ownable, ReentrancyGuard {
         actions[0] = ACTION_WITHDRAW_ASSET;
         return actions;
     }
-    function buildRepay() pure virtual public returns(bytes32[] memory) {
-        bytes32[] memory actions = new bytes32[](2);
-        actions[0] = ACTION_SUPPLY_ASSET;
-        actions[1] = ACTION_WITHDRAW_ASSET;
-        return actions;
-    }
+
     function buildRepayBorrow() pure public returns(bytes32[] memory) {
         bytes32[] memory actions = new bytes32[](2);
         actions[0] = ACTION_SUPPLY_ASSET;
         return actions;
     }
 
-    function getMintableToken(uint256 _usdcSupply, uint256 _mintedTUSD, uint256 _toMintTUSD) public view returns (uint256) {
-        uint256 totalMintable = _usdcSupply.mul(LIQUIDATION_THRESHOLD)
-            .mul(PRECISION)
-            .mul(decimalAdjust)
-            .div(LIQUIDATION_PRECISION)
-            .div(MIN_HEALTH_FACTOR);
-        require(totalMintable >= _mintedTUSD + _toMintTUSD, "User can not mint more TUSD");
-        totalMintable -= _mintedTUSD;
-        return totalMintable;
-    }
-
-    function getBurnableToken(uint256 _tUsdRepayAmount, uint256 tUSDBorrowAmount, uint256 _usdcToBePayed) public view returns (uint256) {
-        require(tUSDBorrowAmount >= _tUsdRepayAmount, "You have not minted enough TUSD");
-        if(tUSDBorrowAmount == 0){
-            return _usdcToBePayed;
-        }
-        else{
-            uint256 totalWithdrawableCollateral = _tUsdRepayAmount.mul(LIQUIDATION_PRECISION)
-                .mul(MIN_HEALTH_FACTOR)
-                .div(LIQUIDATION_THRESHOLD)
-                .div(PRECISION)
-                .div(decimalAdjust);
-            require(totalWithdrawableCollateral <= _usdcToBePayed, "User cannot withdraw more collateral");
-            return totalWithdrawableCollateral;
-        }
+    function buildRepay() pure virtual public returns(bytes32[] memory) {
+        bytes32[] memory actions = new bytes32[](2);
+        actions[0] = ACTION_SUPPLY_ASSET;
+        actions[1] = ACTION_WITHDRAW_ASSET;
+        return actions;
     }
     
     receive() external payable {}

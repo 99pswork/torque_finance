@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
+pragma abicoder v2;
 
 //  _________  ________  ________  ________  ___  ___  _______
 // |\___   ___\\   __  \|\   __  \|\   __  \|\  \|\  \|\  ___ \
@@ -78,5 +79,9 @@ contract SwapTorqueToken is Ownable {
 
     function updateTreasury(address _treasury) external onlyOwner {
         treasury = _treasury;
+    }
+
+    function encoderPath(address _tokenInput, uint24 poolFee1, address _tokenIntermediate, uint24 poolFee2, address _tokenOutput) public pure returns (bytes memory) {
+        return abi.encodePacked(_tokenInput, poolFee1, _tokenIntermediate, poolFee2, _tokenOutput);
     }
 }

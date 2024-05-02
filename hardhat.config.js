@@ -24,6 +24,15 @@ module.exports = {
           },
         },
       },
+      {
+        version: "0.7.5",
+        settings: {
+          optimizer: {
+            enabled: false,
+            // runs: 200, // Adjust the number of runs as needed
+          },
+        },
+      },
     ],
     viaIR: true,
     // version: "0.8.19",
