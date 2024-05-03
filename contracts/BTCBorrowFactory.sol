@@ -30,18 +30,19 @@ contract BTCBorrowFactory is Ownable {
     address public newOwner = 0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01;
     address public treasury = 0x0f773B3d518d0885DbF0ae304D87a718F68EEED5;
     RewardsUtil public rewardsUtil = RewardsUtil(0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4);
+    address public asset = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f;
 
     uint public totalBorrow;
     uint public totalSupplied;
 
     constructor() Ownable(msg.sender) {}
 
-    function deployBTCContract() public returns (address) {
+    function deployBTCContract() internal returns (address) {
         require(!checkIfUserExist(msg.sender), "Contract already exists!");
         BTCBorrow borrow = new BTCBorrow(newOwner, 
         address(0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf), 
         address(0x88730d254A2f7e6AC8388c3198aFd694bA9f7fae), 
-        address(0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f),
+        asset,
         address(0xaf88d065e77c8cC2239327C5EDb3A432268e5831),
         address(0xbdE8F31D2DdDA895264e27DD990faB3DC87b372d),
         address(0xfdf7b4486f5de843838EcFd254711E06aF1f0641),
@@ -60,7 +61,9 @@ contract BTCBorrowFactory is Ownable {
 
     function callBorrow(uint supplyAmount, uint borrowAmountUSDC, uint tUSDBorrowAmount) external {
         if(!checkIfUserExist(msg.sender)){
-            deployBTCContract();
+            address userAddress = deployBTCContract();
+            IERC20(asset).transferFrom(msg.sender,address(this), supplyAmount);
+            IERC20(asset).approve(userAddress, supplyAmount);
         }
         BTCBorrow btcBorrow =  BTCBorrow(userContract[msg.sender]);
         btcBorrow.borrow(msg.sender, supplyAmount, borrowAmountUSDC, tUSDBorrowAmount);
@@ -157,5 +160,10 @@ contract BTCBorrowFactory is Ownable {
         return btcBorrow.mintableTUSD(supplyAmount);
     }
 
-
+    function getBorrowableUsdc(address _address, uint256 supply) external view returns (uint256) {
+        require(checkIfUserExist(_address), "Contract not created!");
+        BTCBorrow btcBorrow =  BTCBorrow(userContract[_address]);
+        return (btcBorrow.getBorrowableUsdc(supply));
+    }
+    
 }
