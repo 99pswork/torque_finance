@@ -24,7 +24,7 @@ async function deployETHFactory() {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-deployBTCFactory().catch((error) => {
+deployETHFactory().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
