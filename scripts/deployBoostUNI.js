@@ -6,31 +6,31 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 let boostWBTCAddress;
-// npx hardhat verify --network arbitrum 0x2f93710017B311ADd7D247003a2f4F7c4f5Ac193 "Torque BTC" "tBTC" "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f" "0xd3cCB75fe5ae9Ce1EBCE1ceA4391c8b9940035Fb" "0x6f180769a8471d35EA707C4bfF04D9Dc73708bBD" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"
-async function deployBoostWBTCContract() {
+// npx hardhat verify --network arbitrum 0x12D5c02aC3ef65B6B8Cc5437934682c4fEfAA15C "Torque UNI" "tUNI" "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0" "0x10a976a1BA93d9d900CD79d3d683bcc8dDce02Ab" "0x0c70A2F380024f8dF2576D03C08304cA84Be4C33" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"
+async function deployBoostUNIContract() {
 
-  const BoostWBTC = await hre.ethers.getContractFactory("BoostBTC");
-  let boostWbtc;
-  console.log("Boost WBTC factory created.");
+  const BoostUNI = await hre.ethers.getContractFactory("BoostUNI");
+  let boostUni;
+  console.log("Boost UNI factory created.");
   try{
-    boostWbtc = await BoostWBTC.deploy("Torque BTC",
-    "tBTC",
-    "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
-    "0xd3cCB75fe5ae9Ce1EBCE1ceA4391c8b9940035Fb",
-    "0x6f180769a8471d35EA707C4bfF04D9Dc73708bBD",
+    boostUni = await BoostUNI.deploy("Torque UNI",
+    "tUNI",
+    "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0",
+    "0x10a976a1BA93d9d900CD79d3d683bcc8dDce02Ab",
+    "0x31bd2155565E0757564D86CC2E4eF78bf2F18AfA",
     "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
     "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"); // Pass constructor Arguments 
   }
   catch (error) {
-    console.error("Error deploying Boost WBTC:", error.message);
+    console.error("Error deploying Boost UNI:", error.message);
     process.exit(1);
   }
-  console.log("Boost WBTC Address", boostWbtc.target);
-  boostWBTCAddress = boostWbtc.target;
+  console.log("Boost UNI Address", boostUni.target);
+  boostWBTCAddress = boostUni.target;
   
 }
 
-deployBoostWBTCContract().catch((error) => {
+deployBoostUNIContract().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
