@@ -7,7 +7,7 @@
 const hre = require("hardhat");
 let boostETHAddress;
 
-// npx hardhat verify --network arbitrum 0x23ca7Ae7ee8356b5d8443C65d5D758643A3F7120 "Torque ETH" "tETH" "0x82af49447d8a07e3bd95bd0d56f35241523fbab1" "0x76305dF6B30DbbA589Cf7DfE9b65208bD5e4e6D1" "0xe2405f2ecF72e4289e23dA5Ec588F1400594f43e" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"
+// npx hardhat verify --network arbitrum 0x36Ac52C415042Fbc6D7564f4ad1410094f214f92 "Torque ETH" "tETH" "0x82af49447d8a07e3bd95bd0d56f35241523fbab1" "0xd698D5F734E6be707B33f452A840BA56159A81aD" "0x523823e1FAb8A853E355b927589d75f000dbA7a9" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"
 async function deployBoostETHContract() {
 
   const BoostETH = await hre.ethers.getContractFactory("BoostETH");
@@ -17,8 +17,8 @@ async function deployBoostETHContract() {
     boostETH = await BoostETH.deploy("Torque ETH",
     "tETH",
     "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
-    "0x76305dF6B30DbbA589Cf7DfE9b65208bD5e4e6D1",
-    "0xe2405f2ecF72e4289e23dA5Ec588F1400594f43e",
+    "0xd698D5F734E6be707B33f452A840BA56159A81aD",
+    "0x523823e1FAb8A853E355b927589d75f000dbA7a9",
     "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
     "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"); // Pass constructor Arguments 
   }
