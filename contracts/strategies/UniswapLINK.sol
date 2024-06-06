@@ -16,11 +16,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
-contract UniswapUNI is Ownable, ReentrancyGuard {
+contract UniswapLINK is Ownable, ReentrancyGuard {
 
     using SafeMath for uint256;
     
-    IERC20 public uniToken;
+    IERC20 public linkToken;
     IERC20 public wethToken;
     ISwapRouter public swapRouter;
 
@@ -42,13 +42,13 @@ contract UniswapUNI is Ownable, ReentrancyGuard {
     event Withdrawal(uint256 amount);
 
     constructor(
-        address _uniToken,
+        address _linkToken,
         address _wethToken,
         address _positionManager, 
         address _swapRouter,
         address _treasury
     ) Ownable(msg.sender) {
-        uniToken = IERC20(_uniToken);
+        linkToken = IERC20(_linkToken);
         wethToken = IERC20(_wethToken);
         positionManager = INonfungiblePositionManager(_positionManager);
         swapRouter = ISwapRouter(_swapRouter);
@@ -57,21 +57,21 @@ contract UniswapUNI is Ownable, ReentrancyGuard {
 
     function deposit(uint256 amount) external nonReentrant {
         require(msg.sender == controller, "Only controller can call this!");
-        require(uniToken.transferFrom(msg.sender, address(this), amount), "Transfer Asset Failed");
-        uint256 uniToConvert = amount / 2; 
-        uint256 uniToKeep = amount - uniToConvert;
-        uint256 wethAmount = convertUnitoWETH(uniToConvert);
-        uniToken.approve(address(positionManager), uniToKeep);
+        require(linkToken.transferFrom(msg.sender, address(this), amount), "Transfer Asset Failed");
+        uint256 linkToConvert = amount / 2; 
+        uint256 linkToKeep = amount - linkToConvert;
+        uint256 wethAmount = convertLinktoWETH(linkToConvert);
+        linkToken.approve(address(positionManager), linkToKeep);
         wethToken.approve(address(positionManager), wethAmount);
         uint256 amount0Min = wethAmount * (1000 - slippage) / 1000;
-        uint256 amount1Min = uniToKeep * (1000 - slippage) / 1000;
+        uint256 amount1Min = linkToKeep * (1000 - slippage) / 1000;
 
         if(!poolInitialised){
-            INonfungiblePositionManager.MintParams memory params = createMintParams(wethAmount, uniToKeep, amount0Min, amount1Min);
+            INonfungiblePositionManager.MintParams memory params = createMintParams(linkToKeep, wethAmount, amount0Min, amount1Min);
             (tokenId,,,) = positionManager.mint(params);
             poolInitialised = true;
         } else {
-            INonfungiblePositionManager.IncreaseLiquidityParams memory increaseLiquidityParams = createIncreaseLiquidityParams(wethAmount, uniToKeep, amount0Min, amount1Min);
+            INonfungiblePositionManager.IncreaseLiquidityParams memory increaseLiquidityParams = createIncreaseLiquidityParams(wethAmount, linkToKeep, amount0Min, amount1Min);
             positionManager.increaseLiquidity(increaseLiquidityParams);
         }
         emit Deposited(amount);
@@ -99,17 +99,14 @@ contract UniswapUNI is Ownable, ReentrancyGuard {
             amount1Max: uint128(amount1)
         });
         positionManager.collect(collectParams);
-        uint256 convertedUniAmount = convertWETHtoUni(amount0);
-        amount1 = amount1.add(convertedUniAmount);
-        require(uniToken.transfer(msg.sender, amount1), "Transfer Asset Failed");
+        uint256 convertedLinkAmount = convertWETHtoLink(amount0);
+        amount1 = amount1.add(convertedLinkAmount);
+        require(linkToken.transfer(msg.sender, amount1), "Transfer Asset Failed");
         emit Withdrawal(amount);
     }
 
     function compound() external {
         require(msg.sender == controller, "Only controller can call this!");
-        if(!poolInitialised){
-            return;
-        }
         INonfungiblePositionManager.CollectParams memory collectParams =
             INonfungiblePositionManager.CollectParams({
                 tokenId: tokenId,
@@ -117,25 +114,25 @@ contract UniswapUNI is Ownable, ReentrancyGuard {
                 amount0Max: type(uint128).max,
                 amount1Max: type(uint128).max
         });
-        (uint256 wethVal,) = positionManager.collect(collectParams);
-        convertWETHtoUni(wethVal);
-        uint256 uniAmount = uniToken.balanceOf(address(this));
-        require(uniToken.transfer(msg.sender, uniAmount), "Transfer Asset Failed");
+        (uint256 wethVal, ) = positionManager.collect(collectParams);
+        convertWETHtoLink(wethVal);
+        uint256 linkAmount = linkToken.balanceOf(address(this));
+        require(linkToken.transfer(msg.sender, linkAmount), "Transfer Asset Failed");
     }
 
     function setController(address _controller) external onlyOwner() {
         controller = _controller;
     }
 
-    function createMintParams(uint256 wethAmount, uint256 uniToKeep, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.MintParams memory) {
+    function createMintParams(uint256 linkToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.MintParams memory) {
         return INonfungiblePositionManager.MintParams({
             token0: address(wethToken),
-            token1: address(uniToken),
+            token1: address(linkToken),
             fee: poolFee,
             tickLower: tickLower,
             tickUpper: tickUpper,
             amount0Desired: wethAmount,
-            amount1Desired: uniToKeep,
+            amount1Desired: linkToKeep,
             amount0Min: amount0Min,
             amount1Min: amount1Min,
             recipient: address(this),
@@ -143,11 +140,11 @@ contract UniswapUNI is Ownable, ReentrancyGuard {
         });
     }
 
-    function createIncreaseLiquidityParams(uint256 wethAmount, uint256 uniToKeep, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.IncreaseLiquidityParams memory) {
+    function createIncreaseLiquidityParams(uint256 wethAmount, uint256 linkToKeep, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.IncreaseLiquidityParams memory) {
         return INonfungiblePositionManager.IncreaseLiquidityParams({
             tokenId: tokenId,
             amount0Desired: wethAmount,
-            amount1Desired: uniToKeep,
+            amount1Desired: linkToKeep,
             amount0Min: amount0Min,
             amount1Min: amount1Min,
             deadline: block.timestamp + 2 minutes
@@ -180,28 +177,28 @@ contract UniswapUNI is Ownable, ReentrancyGuard {
         poolFee = _poolFee;
     }
 
-    function convertUnitoWETH(uint256 uniAmount) internal returns (uint256) {
-        uniToken.approve(address(swapRouter), uniAmount);
+    function convertLinktoWETH(uint256 linkAmount) internal returns (uint256) {
+        linkToken.approve(address(swapRouter), linkAmount);
         ISwapRouter.ExactInputSingleParams memory params =  
             ISwapRouter.ExactInputSingleParams({
-                tokenIn: address(uniToken),
+                tokenIn: address(linkToken),
                 tokenOut: address(wethToken),
                 fee: poolFee,
                 recipient: address(this),
                 deadline: block.timestamp,
-                amountIn: uniAmount,
+                amountIn: linkAmount,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             });
         return swapRouter.exactInputSingle(params);
     }
 
-    function convertWETHtoUni(uint256 wethAmount) internal returns (uint256) {
+    function convertWETHtoLink(uint256 wethAmount) internal returns (uint256) {
         wethToken.approve(address(swapRouter), wethAmount);
         ISwapRouter.ExactInputSingleParams memory params =  
             ISwapRouter.ExactInputSingleParams({
                 tokenIn: address(wethToken),
-                tokenOut: address(uniToken),
+                tokenOut: address(linkToken),
                 fee: poolFee,
                 recipient: address(this),
                 deadline: block.timestamp,

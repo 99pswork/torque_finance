@@ -64,8 +64,8 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         stargateETHER = StargateETHER(stargateETHER_);
         treasury = treasury_;
         rewardsUtil = RewardsUtil(_rewardsUtil);
-        gmxAllocation = 100;
-        stargateAllocation = 0;
+        gmxAllocation = 50;
+        stargateAllocation = 50;
         performanceFee = 10;
         lastCompoundTimestamp = block.timestamp;
         totalAssetsAmount = 0;

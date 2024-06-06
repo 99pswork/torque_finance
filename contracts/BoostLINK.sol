@@ -16,24 +16,33 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "./strategies/GMXV2BTC.sol";
-import "./strategies/UniswapBTC.sol";
+interface GMXLINK {
+    function deposit(uint256 _amount) external payable;
+    function withdraw(uint256 _amount, address _userAddress) external payable;
+    function compound() external;
+}
+
+interface LINKUniswap { 
+    function deposit(uint256 _amount) external;
+    function withdraw(uint128 withdrawAmount, uint256 totalAllocation) external;
+    function compound() external;
+}
 
 interface RewardsUtil {
     function userDepositReward(address _userAddress, uint256 _depositAmount) external;
     function userWithdrawReward(address _userAddress, uint256 _withdrawAmount) external;
 }
 
-contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
+contract BoostLINK is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using Math for uint256;
 
     event Deposited(address indexed account, uint256 amount, uint256 shares);
     event Withdrawn(address indexed account, uint256 amount, uint256 shares);
     
-    IERC20 public wbtcToken;
-    GMXV2BTC public gmxV2Btc;
-    UniswapBTC public uniswapBtc;
+    IERC20 public linkToken;
+    GMXLINK public gmxV2Link;
+    LINKUniswap public uniswapLink;
     address public treasury;
     RewardsUtil public rewardsUtil;
 
@@ -41,46 +50,47 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     uint256 public uniswapAllocation;
     uint256 public lastCompoundTimestamp;
     uint256 public performanceFee = 10;
-    uint256 public minWbtcAmount = 20000;
+    uint256 public minLinkAmount = 1000000000000000000;
     uint256 public treasuryFee = 0;
 
     uint256 public totalAssetsAmount = 0;
-    uint256 public compoundWbtcAmount = 0;
+    uint256 public compoundLinkAmount = 0;
 
     constructor(
     string memory _name, 
     string memory _symbol,
-    address wBTC,
-    address payable _gmxV2BtcAddress,
-    address _uniswapBtcAddress,
+    address _linkToken,
+    address payable _gmxV2LinkAddress,
+    address _uniswapLinkAddress,
     address _treasury,
     address _rewardsUtil
     ) ERC20(_name, _symbol) Ownable(msg.sender) {
-        wbtcToken = IERC20(wBTC);
-        gmxV2Btc = GMXV2BTC(_gmxV2BtcAddress);
-        uniswapBtc = UniswapBTC(_uniswapBtcAddress);
+        linkToken = IERC20(_linkToken);
+        gmxV2Link = GMXLINK(_gmxV2LinkAddress);
+        uniswapLink = LINKUniswap(_uniswapLinkAddress);
         gmxAllocation = 50;
         uniswapAllocation = 50;
         treasury = _treasury;
         rewardsUtil = RewardsUtil(_rewardsUtil);
     }
 
-    function depositBTC(uint256 depositAmount) external payable nonReentrant() {
+    function depositLINK(uint256 depositAmount) external payable nonReentrant() {
         require(msg.value > 0, "Please pass GMX execution fees");
-        require(wbtcToken.balanceOf(address(this)) >= compoundWbtcAmount, "Insufficient compound balance");
-        require(wbtcToken.transferFrom(msg.sender, address(this), depositAmount), "Transfer Asset Failed");
-        uint256 depositAndCompound = depositAmount + compoundWbtcAmount;
-        compoundWbtcAmount = 0;
+        require(linkToken.balanceOf(address(this)) >= compoundLinkAmount, "Insufficient compound balance");
+        require(linkToken.transferFrom(msg.sender, address(this), depositAmount), "Transfer Asset Failed");
+        uint256 depositAndCompound = depositAmount + compoundLinkAmount;
+        compoundLinkAmount = 0;
+       
         uint256 uniswapDepositAmount = depositAndCompound.mul(uniswapAllocation).div(100);
         uint256 gmxDepositAmount = depositAndCompound.sub(uniswapDepositAmount);
         
-        if(uniswapDepositAmount > 0) {
-            wbtcToken.approve(address(uniswapBtc), uniswapDepositAmount);
-            uniswapBtc.deposit(uniswapDepositAmount);
+        if (uniswapDepositAmount > 0) {
+            linkToken.approve(address(uniswapLink), uniswapDepositAmount);
+            uniswapLink.deposit(uniswapDepositAmount);
         }
 
-        wbtcToken.approve(address(gmxV2Btc), gmxDepositAmount);
-        gmxV2Btc.deposit{value: msg.value}(gmxDepositAmount);
+        linkToken.approve(address(gmxV2Link), gmxDepositAmount);
+        gmxV2Link.deposit{value: msg.value}(gmxDepositAmount);
 
         uint256 shares = _convertToShares(depositAmount);
         _mint(msg.sender, shares);
@@ -89,7 +99,7 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         emit Deposited(msg.sender, depositAmount, shares);
     }
 
-    function withdrawBTC(uint256 sharesAmount) external payable nonReentrant() {
+    function withdrawLINK(uint256 sharesAmount) external payable nonReentrant() {
         require(msg.value > 0, "Please pass GMX execution fees");
         uint256 withdrawAmount = _convertToAssets(sharesAmount);
         uint256 uniswapWithdrawAmount = withdrawAmount.mul(uniswapAllocation).div(100);
@@ -97,19 +107,18 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         _burn(msg.sender, sharesAmount);
         uint256 totalUniSwapAllocation = totalAssetsAmount.mul(uniswapAllocation).div(100);
         totalAssetsAmount = totalAssetsAmount.sub(withdrawAmount);
+        uint256 prevLinkAmount = linkToken.balanceOf(address(this));
 
-        uint256 prevWbtcAmount = wbtcToken.balanceOf(address(this));
-        
-        if(uniswapWithdrawAmount > 0) {
-            uniswapBtc.withdraw(uint128(uniswapWithdrawAmount), totalUniSwapAllocation);
+        if (uniswapWithdrawAmount > 0) {
+            uniswapLink.withdraw(uint128(uniswapWithdrawAmount), totalUniSwapAllocation);
         }
-        
-        gmxV2Btc.withdraw{value: msg.value}(gmxWithdrawAmount, msg.sender);
-        uint256 postWbtcAmount = wbtcToken.balanceOf(address(this));
-        uint256 wbtcAmount = postWbtcAmount - prevWbtcAmount;
-        require(wbtcToken.transfer(msg.sender, wbtcAmount), "Transfer Asset Failed");
+
+        gmxV2Link.withdraw{value: msg.value}(gmxWithdrawAmount, msg.sender);
+        uint256 postLinkAmount = linkToken.balanceOf(address(this));
+        uint256 linkAmount = postLinkAmount - prevLinkAmount;
+        require(linkToken.transfer(msg.sender, linkAmount), "Transfer Asset Failed");
         rewardsUtil.userWithdrawReward(msg.sender, sharesAmount);
-        emit Withdrawn(msg.sender, wbtcAmount, sharesAmount);
+        emit Withdrawn(msg.sender, linkAmount, sharesAmount);
     }
 
     function compoundFees() external nonReentrant(){
@@ -117,18 +126,18 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     }
 
     function _compoundFees() internal {
-        uint256 prevWbtcAmount = wbtcToken.balanceOf(address(this));
-        uniswapBtc.compound(); 
-        gmxV2Btc.compound();
-        uint256 postWbtcAmount = wbtcToken.balanceOf(address(this));
-        uint256 treasuryAmount = (postWbtcAmount - prevWbtcAmount).mul(performanceFee).div(1000);
+        uint256 prevLinkAmount = linkToken.balanceOf(address(this));
+        uniswapLink.compound(); 
+        gmxV2Link.compound();
+        uint256 postLinkAmount = linkToken.balanceOf(address(this));
+        uint256 treasuryAmount = (postLinkAmount - prevLinkAmount).mul(performanceFee).div(1000);
         treasuryFee = treasuryFee.add(treasuryAmount);
-        if(treasuryFee >= minWbtcAmount){
-            require(wbtcToken.transfer(treasury , treasuryFee), "Transfer Asset Failed");
+        if(treasuryFee >= minLinkAmount){
+            require(linkToken.transfer(treasury , treasuryFee), "Transfer Asset Failed");
             treasuryFee = 0;
         }
-        uint256 wbtcAmount = postWbtcAmount - prevWbtcAmount - treasuryAmount;
-        compoundWbtcAmount += wbtcAmount;
+        uint256 linkAmount = postLinkAmount - prevLinkAmount - treasuryAmount;
+        compoundLinkAmount += linkAmount;
         lastCompoundTimestamp = block.timestamp;
     }
 
@@ -138,8 +147,8 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         uniswapAllocation = _uniswapAllocation;
     }
 
-    function setMinWbtc(uint256 _minWbtc) public onlyOwner() {
-        minWbtcAmount = _minWbtc;
+    function setMinLink(uint256 _minLink) public onlyOwner() {
+        minLinkAmount = _minLink;
     }
 
     function setPerformanceFee(uint256 _performanceFee) public onlyOwner {
@@ -153,10 +162,6 @@ contract BoostBTC is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
 
     function withdrawTreasuryFees() external onlyOwner() {
         payable(treasury).transfer(address(this).balance);
-    }
-
-    function decimals() public view override returns (uint8) {
-        return 8;
     }
 
     function _convertToShares(uint256 assets) internal view returns (uint256) {
