@@ -13,11 +13,11 @@ const hre = require("hardhat");
 //39874999999999999
 async function deployRewardsUtilContract() {
 
-  const RewardsUtil = await hre.ethers.getContractFactory("RewardUtil");
+  const RewardsUtil = await hre.ethers.getContractFactory("ARBRewardUtil");
   let rewardsUtil;
   console.log("Rewards Util factory created.");
   try{
-    rewardsUtil = await RewardsUtil.deploy("0xb56C29413AF8778977093B9B4947efEeA7136C36","0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01");
+    rewardsUtil = await RewardsUtil.deploy();
   }
   catch (error) {
     console.error("Error deploying Rewards Util:", error.message);
