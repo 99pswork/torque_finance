@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RewardUtil is ReentrancyGuard, Ownable { 
+contract TORQRewardUtil is ReentrancyGuard, Ownable { 
     using SafeMath for uint256;
 
     struct RewardConfig {
@@ -31,8 +31,8 @@ contract RewardUtil is ReentrancyGuard, Ownable {
         bool isActive;
     }
 
-    IERC20 public torqToken;
-    address public governor;
+    IERC20 public torqToken = IERC20(0xb56C29413AF8778977093B9B4947efEeA7136C36);
+    address public governor = address(0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01);
     bool public claimsPaused = false;
 
     mapping(address => bool) public isTorqueContract;
@@ -50,11 +50,7 @@ contract RewardUtil is ReentrancyGuard, Ownable {
     error NotPermitted(address);
     error InvalidTorqueContract(address);
 
-    constructor(address _torqTokenAddress, address _governor) Ownable(msg.sender) {
-        require(_torqTokenAddress != address(0), "Invalid TORQ token address");
-        torqToken = IERC20(_torqTokenAddress);
-        governor = _governor;
-    }
+    constructor() Ownable(msg.sender) {}
 
     modifier onlyGovernor() {
         if (msg.sender != governor) revert NotPermitted(msg.sender);
