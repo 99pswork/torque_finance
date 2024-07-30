@@ -6,7 +6,7 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 let boostWBTCAddress;
-// npx hardhat verify --network arbitrum 0x1024966Bb292491328C8807Fb98D307cCbBFa0E8 "Torque UNI" "tUNI" "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0" "0xF39A2C0c28f8bc1B0cb6154902B084bCcE4360E7" "0xa3E26E9C14b0DFB380051F1406818775C74Ac272" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"
+// npx hardhat verify --network arbitrum 0x22BacE1E1D034b08610Ec0A7c6Cbce592807F302 "Torque UNI" "tUNI" "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0" "0x566496AA56d61eB194A47328B60589DaEC1841C9" "0x7AB86ff911E02e6F32348D608B834be00F706720" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"
 async function deployBoostUNIContract() {
 
   const BoostUNI = await hre.ethers.getContractFactory("BoostUNI");
@@ -16,10 +16,10 @@ async function deployBoostUNIContract() {
     boostUni = await BoostUNI.deploy("Torque UNI",
     "tUNI",
     "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0",
-    "0xF39A2C0c28f8bc1B0cb6154902B084bCcE4360E7",
-    "0xa3E26E9C14b0DFB380051F1406818775C74Ac272",
+    "0x566496AA56d61eB194A47328B60589DaEC1841C9",
+    "0x7AB86ff911E02e6F32348D608B834be00F706720",
     "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
-    "0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4"); // Pass constructor Arguments 
+    "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"); // Pass constructor Arguments 
   }
   catch (error) {
     console.error("Error deploying Boost UNI:", error.message);

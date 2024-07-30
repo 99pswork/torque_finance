@@ -28,7 +28,7 @@ interface LINKUniswap {
     function compound() external;
 }
 
-interface RewardsUtil {
+interface TORQRewardUtil {
     function userDepositReward(address _userAddress, uint256 _depositAmount) external;
     function userWithdrawReward(address _userAddress, uint256 _withdrawAmount) external;
 }
@@ -44,7 +44,7 @@ contract BoostLINK is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     GMXLINK public gmxV2Link;
     LINKUniswap public uniswapLink;
     address public treasury;
-    RewardsUtil public rewardsUtil;
+    TORQRewardUtil public torqRewardUtil;
 
     uint256 public gmxAllocation;
     uint256 public uniswapAllocation;
@@ -63,7 +63,7 @@ contract BoostLINK is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     address payable _gmxV2LinkAddress,
     address _uniswapLinkAddress,
     address _treasury,
-    address _rewardsUtil
+    address _torqRewardUtil
     ) ERC20(_name, _symbol) Ownable(msg.sender) {
         linkToken = IERC20(_linkToken);
         gmxV2Link = GMXLINK(_gmxV2LinkAddress);
@@ -71,7 +71,7 @@ contract BoostLINK is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         gmxAllocation = 50;
         uniswapAllocation = 50;
         treasury = _treasury;
-        rewardsUtil = RewardsUtil(_rewardsUtil);
+        torqRewardUtil = TORQRewardUtil(_torqRewardUtil);
     }
 
     function depositLINK(uint256 depositAmount) external payable nonReentrant() {
@@ -95,7 +95,7 @@ contract BoostLINK is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         uint256 shares = _convertToShares(depositAmount);
         _mint(msg.sender, shares);
         totalAssetsAmount = totalAssetsAmount.add(depositAndCompound);
-        rewardsUtil.userDepositReward(msg.sender, shares);
+        torqRewardUtil.userDepositReward(msg.sender, shares);
         emit Deposited(msg.sender, depositAmount, shares);
     }
 
@@ -117,7 +117,7 @@ contract BoostLINK is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         uint256 postLinkAmount = linkToken.balanceOf(address(this));
         uint256 linkAmount = postLinkAmount - prevLinkAmount;
         require(linkToken.transfer(msg.sender, linkAmount), "Transfer Asset Failed");
-        rewardsUtil.userWithdrawReward(msg.sender, sharesAmount);
+        torqRewardUtil.userWithdrawReward(msg.sender, sharesAmount);
         emit Withdrawn(msg.sender, linkAmount, sharesAmount);
     }
 
@@ -178,8 +178,8 @@ contract BoostLINK is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         return totalAssetsAmount;
     }
 
-    function updateRewardsUtil(address _rewardsUtil) external onlyOwner() {
-        rewardsUtil = RewardsUtil(_rewardsUtil);
+    function updateTORQRewardUtil(address _torqRewardUtil) external onlyOwner() {
+        torqRewardUtil = TORQRewardUtil(_torqRewardUtil);
     }
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {

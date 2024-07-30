@@ -30,7 +30,7 @@ interface StargateETHER {
     function compound() external;
 }
 
-interface RewardsUtil {
+interface TORQRewardUtil {
     function userDepositReward(address _userAddress, uint256 _depositAmount) external;
     function userWithdrawReward(address _userAddress, uint256 _withdrawAmount) external;
 }
@@ -45,7 +45,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     IWETH9 public weth;
     GMXETH public gmxETH;
     StargateETHER public stargateETHER;
-    RewardsUtil public rewardsUtil;
+    TORQRewardUtil public torqRewardUtil;
     address public treasury;
 
     uint256 public gmxAllocation;
@@ -58,12 +58,12 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
     
     uint256 public totalAssetsAmount;
 
-    constructor(string memory _name, string memory _symbol, address payable weth_, address payable gmxETH_, address payable stargateETHER_, address treasury_, address _rewardsUtil) ERC20(_name, _symbol) Ownable(msg.sender) {
+    constructor(string memory _name, string memory _symbol, address payable weth_, address payable gmxETH_, address payable stargateETHER_, address treasury_, address _torqRewardUtil) ERC20(_name, _symbol) Ownable(msg.sender) {
         weth = IWETH9(weth_);
         gmxETH = GMXETH(gmxETH_);
         stargateETHER = StargateETHER(stargateETHER_);
         treasury = treasury_;
-        rewardsUtil = RewardsUtil(_rewardsUtil);
+        torqRewardUtil = TORQRewardUtil(_torqRewardUtil);
         gmxAllocation = 50;
         stargateAllocation = 50;
         performanceFee = 10;
@@ -92,7 +92,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         uint256 shares = _convertToShares(depositAmount);
         _mint(msg.sender, shares);
         totalAssetsAmount = totalAssetsAmount.add(depositAndCompound);
-        rewardsUtil.userDepositReward(msg.sender, shares);
+        torqRewardUtil.userDepositReward(msg.sender, shares);
         emit Deposited(msg.sender, depositAmount, shares);
     }
 
@@ -112,7 +112,7 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         uint256 postWethAmount = weth.balanceOf(address(this));
         uint256 wethAmount = postWethAmount - prevWethAmount;
         require(weth.transfer(msg.sender, wethAmount), "Transfer Asset Failed");
-        rewardsUtil.userWithdrawReward(msg.sender, sharesAmount);
+        torqRewardUtil.userWithdrawReward(msg.sender, sharesAmount);
         emit Withdrawn(msg.sender, wethAmount, sharesAmount);
     }
 
@@ -173,8 +173,8 @@ contract BoostETH is AutomationCompatible, Ownable, ReentrancyGuard, ERC20{
         payable(treasury).transfer(address(this).balance);
     }
 
-    function updateRewardsUtil(address _rewardsUtil) external onlyOwner() {
-        rewardsUtil = RewardsUtil(_rewardsUtil);
+    function updateTORQRewardUtil(address _torqRewardUtil) external onlyOwner() {
+        torqRewardUtil = TORQRewardUtil(_torqRewardUtil);
     }
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {

@@ -28,7 +28,7 @@ interface UNIUniswap {
     function compound() external;
 }
 
-interface RewardsUtil {
+interface TORQRewardUtil {
     function userDepositReward(address _userAddress, uint256 _depositAmount) external;
     function userWithdrawReward(address _userAddress, uint256 _withdrawAmount) external;
 }
@@ -44,7 +44,7 @@ contract BoostUNI is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     GMXUNI public gmxV2Uni;
     UNIUniswap public uniswapUni;
     address public treasury;
-    RewardsUtil public rewardsUtil;
+    TORQRewardUtil public torqRewardUtil;
 
     uint256 public gmxAllocation;
     uint256 public uniswapAllocation;
@@ -63,7 +63,7 @@ contract BoostUNI is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     address payable _gmxV2UniAddress,
     address _uniswapUniAddress,
     address _treasury,
-    address _rewardsUtil
+    address _torqRewardUtil
     ) ERC20(_name, _symbol) Ownable(msg.sender) {
         uniToken = IERC20(_uniToken);
         gmxV2Uni = GMXUNI(_gmxV2UniAddress);
@@ -71,7 +71,7 @@ contract BoostUNI is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         gmxAllocation = 50;
         uniswapAllocation = 50;
         treasury = _treasury;
-        rewardsUtil = RewardsUtil(_rewardsUtil);
+        torqRewardUtil = TORQRewardUtil(_torqRewardUtil);
     }
 
     function depositUNI(uint256 depositAmount) external payable nonReentrant() {
@@ -94,7 +94,7 @@ contract BoostUNI is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         uint256 shares = _convertToShares(depositAmount);
         _mint(msg.sender, shares);
         totalAssetsAmount = totalAssetsAmount.add(depositAndCompound);
-        rewardsUtil.userDepositReward(msg.sender, shares);
+        torqRewardUtil.userDepositReward(msg.sender, shares);
         emit Deposited(msg.sender, depositAmount, shares);
     }
 
@@ -117,7 +117,7 @@ contract BoostUNI is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         uint256 postUniAmount = uniToken.balanceOf(address(this));
         uint256 uniAmount = postUniAmount - prevUniAmount;
         require(uniToken.transfer(msg.sender, uniAmount), "Transfer Asset Failed");
-        rewardsUtil.userWithdrawReward(msg.sender, sharesAmount);
+        torqRewardUtil.userWithdrawReward(msg.sender, sharesAmount);
         emit Withdrawn(msg.sender, uniAmount, sharesAmount);
     }
 
@@ -178,8 +178,8 @@ contract BoostUNI is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
         return totalAssetsAmount;
     }
 
-    function updateRewardsUtil(address _rewardsUtil) external onlyOwner() {
-        rewardsUtil = RewardsUtil(_rewardsUtil);
+    function updateTORQRewardUtil(address _torqRewardUtil) external onlyOwner() {
+        torqRewardUtil = TORQRewardUtil(_torqRewardUtil);
     }
 
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
