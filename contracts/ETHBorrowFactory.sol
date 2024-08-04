@@ -28,7 +28,7 @@ contract ETHBorrowFactory is Ownable {
     
     mapping (address => address payable) public userContract; // User address --> Contract Address
     address public newOwner = 0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01;
-    address public treasury = 0x0f773B3d518d0885DbF0ae304D87a718F68EEED5;
+    address public treasury = 0x177f6519A523EEbb542aed20320EFF9401bC47d0;
     RewardsUtil public rewardsUtil = RewardsUtil(0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4);
     address public asset = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
 

@@ -21,7 +21,7 @@ describe("Uniswap", async function () {
             "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
             "0xC36442b4a4522E871399CD717aBDD847Ab11FE88",
             "0xe592427a0aece92de3edee1f18e0157c05861564",
-            "0x0f773B3d518d0885DbF0ae304D87a718F68EEED5"); // // Pass constructor Arguments 
+            "0x177f6519A523EEbb542aed20320EFF9401bC47d0"); // // Pass constructor Arguments 
         console.log("UniSwap Contract Address",await uniswap.target);
         uniswapAddress = await uniswap.target;
         return uniswap;

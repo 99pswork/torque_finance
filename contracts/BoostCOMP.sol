@@ -39,7 +39,7 @@ contract BoostCOMP is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     uint256 public uniswapAllocation = 100;
     uint256 public lastCompoundTimestamp;
     uint256 public performanceFee = 10;
-    uint256 public minCompAmount = 20000; // PS CHECK
+    uint256 public minCompAmount = 10000000000000000;
     uint256 public treasuryFee = 0;
 
     uint256 public totalAssetsAmount = 0;
@@ -131,7 +131,7 @@ contract BoostCOMP is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     }
 
     function decimals() public view override returns (uint8) {
-        return 18; // PS CHECK
+        return 18;
     }
 
     function _convertToShares(uint256 assets) internal view returns (uint256) {

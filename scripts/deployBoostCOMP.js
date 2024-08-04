@@ -6,18 +6,17 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 let boostWBTCAddress;
-// npx hardhat verify --network arbitrum 0x1b4D6a73704242f9ECc310D883dBa11b764AADdB "Torque BTC" "tBTC" "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f" "0xd6B39C27a778fCf3bD881dA9d4e5a60a75df1B94" "0x39054575e511bae354dBBF72d2B8Ce04C4780054" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"
+// npx hardhat verify --network arbitrum 0x0D08442B2758a50aA8187D602bA8261C333d44B2 "Torque COMP" "tCOMP" "0x354a6da3fcde098f8389cad84b0182725c6c91de" "0x5b51feEB04E2381BB69d685BDAB480c4C29f9a43" "0x39054575e511bae354dBBF72d2B8Ce04C4780054" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"
 async function deployBoostWBTCContract() {
 
-  const BoostWBTC = await hre.ethers.getContractFactory("BoostBTC");
+  const BoostWBTC = await hre.ethers.getContractFactory("BoostCOMP");
   let boostWbtc;
-  console.log("Boost WBTC factory created.");
+  console.log("Boost COMP factory created.");
   try{
-    boostWbtc = await BoostWBTC.deploy("Torque BTC",
-    "tBTC",
-    "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
-    "0xd6B39C27a778fCf3bD881dA9d4e5a60a75df1B94",
-    "0x39054575e511bae354dBBF72d2B8Ce04C4780054",
+    boostWbtc = await BoostWBTC.deploy("Torque COMP",
+    "tCOMP",
+    "0x354a6da3fcde098f8389cad84b0182725c6c91de",
+    "0x5b51feEB04E2381BB69d685BDAB480c4C29f9a43",
     "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
     "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"); // Pass constructor Arguments 
   }
@@ -42,4 +41,4 @@ deployBoostWBTCContract().catch((error) => {
 // Hamilton factory created.
 // Hamilton Contract Address 0x9B030c24CC2DBcE14E0F14bdD67B29C73F64cD7b
 
-// 0xc5C2a3AEAeB09285F7f7c62885129966AE639Bf5 "Torque BTC" "tBTC" "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f" "0x1af712943B1C6B9c1d912cd40c121a3Ebc6055D6" "0xEE5eFB6C1CbA451FEC3e2e8530BF1799b3053354" "0x177f6519A523EEbb542aed20320EFF9401bC47d0"
+// 0x0D08442B2758a50aA8187D602bA8261C333d44B2 "Torque COMP" "tCOMP" "0x354a6da3fcde098f8389cad84b0182725c6c91de" "0x5b51feEB04E2381BB69d685BDAB480c4C29f9a43" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"

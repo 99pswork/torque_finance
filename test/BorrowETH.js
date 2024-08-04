@@ -30,7 +30,7 @@ describe("ETHBorrow", function () {
     "0xbdE8F31D2DdDA895264e27DD990faB3DC87b372d",
     "0x867bF0476655Cf05934869B449a0be0ED534eA60",
     "0xf7F6718Cf69967203740cCb431F6bDBff1E0FB68",
-    "0x0f773B3d518d0885DbF0ae304D87a718F68EEED5",
+    "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
     1);
     console.log("ETH Borrow Contract Address", ethBorrow.target);
     decimalAdjust = await ethers.parseUnits('10', 11);

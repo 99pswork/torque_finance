@@ -30,7 +30,7 @@ describe("BTCBorrow", function () {
     "0xbdE8F31D2DdDA895264e27DD990faB3DC87b372d",
     "0x82536a410d4762d67bff6de0e95f15bc80e052e9",
     "0xa0985c4e6f2a1e694f58b93df3e5f4ba8a09b239",
-    "0x0f773B3d518d0885DbF0ae304D87a718F68EEED5",
+    "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
     1);
     console.log("BTC Borrow Contract Address", btcBorrow.address);
     decimalAdjust = await ethers.parseUnits('10', 11);
