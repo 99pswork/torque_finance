@@ -26,7 +26,7 @@ contract UniswapCOMP is Ownable, ReentrancyGuard {
 
     address treasury;
     uint256 performanceFee;
-    uint24 poolFee = 3000; // PS CHECK
+    uint24 poolFee = 3000;
 
     INonfungiblePositionManager positionManager;
     uint256 slippage = 20;

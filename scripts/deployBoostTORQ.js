@@ -6,26 +6,25 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 let boostWBTCAddress;
-// npx hardhat verify --network arbitrum 0x1b4D6a73704242f9ECc310D883dBa11b764AADdB "Torque BTC" "tBTC" "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f" "0xd6B39C27a778fCf3bD881dA9d4e5a60a75df1B94" "0x39054575e511bae354dBBF72d2B8Ce04C4780054" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"
+// npx hardhat verify --network arbitrum 0xA6c53eC2a3085994000E5B831F5ECCCD051ea02c "Torque TORQ" "tTORQ" "0xb56C29413AF8778977093B9B4947efEeA7136C36" "0x39D84212a09f22751AcfE78930915A35b1659bE6" "0x177f6519A523EEbb542aed20320EFF9401bC47d0" "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"
 async function deployBoostWBTCContract() {
 
-  const BoostWBTC = await hre.ethers.getContractFactory("BoostBTC");
+  const BoostWBTC = await hre.ethers.getContractFactory("BoostTORQ");
   let boostWbtc;
-  console.log("Boost WBTC factory created.");
+  console.log("Boost TORQ factory created.");
   try{
-    boostWbtc = await BoostWBTC.deploy("Torque BTC",
-    "tBTC",
-    "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
-    "0xd6B39C27a778fCf3bD881dA9d4e5a60a75df1B94",
-    "0x39054575e511bae354dBBF72d2B8Ce04C4780054",
+    boostWbtc = await BoostWBTC.deploy("Torque TORQ",
+    "tTORQ",
+    "0xb56C29413AF8778977093B9B4947efEeA7136C36",
+    "0x39D84212a09f22751AcfE78930915A35b1659bE6",
     "0x177f6519A523EEbb542aed20320EFF9401bC47d0",
     "0x3452faA42fd613937dCd43E0f0cBf7d4205919c5"); // Pass constructor Arguments 
   }
   catch (error) {
-    console.error("Error deploying Boost WBTC:", error.message);
+    console.error("Error deploying Boost TORQ:", error.message);
     process.exit(1);
   }
-  console.log("Boost WBTC Address", boostWbtc.target);
+  console.log("Boost TORQ Address", boostWbtc.target);
   boostWBTCAddress = boostWbtc.target;
   
 }

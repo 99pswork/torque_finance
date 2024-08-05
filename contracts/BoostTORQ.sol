@@ -39,7 +39,7 @@ contract BoostTORQ is AutomationCompatible, ERC20, ReentrancyGuard, Ownable {
     uint256 public uniswapAllocation = 100;
     uint256 public lastTorqoundTimestamp;
     uint256 public performanceFee = 10;
-    uint256 public minTorqAmount = 20000; // PS CHECK
+    uint256 public minTorqAmount = 10e24;
     uint256 public treasuryFee = 0;
 
     uint256 public totalAssetsAmount = 0;

@@ -26,7 +26,7 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
 
     address treasury;
     uint256 performanceFee;
-    uint24 poolFee = 100; // PS CHECK
+    uint24 poolFee = 3000;
 
     INonfungiblePositionManager positionManager;
     uint256 slippage = 20;
@@ -60,18 +60,18 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
         require(torqToken.transferFrom(msg.sender, address(this), amount), "Transfer Asset Failed");
         uint256 torqToConvert = amount / 2; 
         uint256 torqToKeep = amount - torqToConvert;
-        uint256 wethAmount = converttorqtoWETH(torqToConvert);
+        uint256 wethAmount = convertTorqtoWETH(torqToConvert);
         torqToken.approve(address(positionManager), torqToKeep);
         wethToken.approve(address(positionManager), wethAmount);
-        uint256 amount0Min = torqToKeep * (1000 - slippage) / 1000;
-        uint256 amount1Min = wethAmount * (1000 - slippage) / 1000;
+        uint256 amount0Min = wethAmount * (1000 - slippage) / 1000;
+        uint256 amount1Min = torqToKeep * (1000 - slippage) / 1000;
 
         if(!poolInitialised){
-            INonfungiblePositionManager.MintParams memory params = createMintParams(torqToKeep, wethAmount, amount0Min, amount1Min);
+            INonfungiblePositionManager.MintParams memory params = createMintParams(wethAmount, torqToKeep, amount0Min, amount1Min);
             (tokenId,,,) = positionManager.mint(params);
             poolInitialised = true;
         } else {
-            INonfungiblePositionManager.IncreaseLiquidityParams memory increaseLiquidityParams = createIncreaseLiquidityParams(torqToKeep, wethAmount, amount0Min, amount1Min);
+            INonfungiblePositionManager.IncreaseLiquidityParams memory increaseLiquidityParams = createIncreaseLiquidityParams(wethAmount, torqToKeep, amount0Min, amount1Min);
             positionManager.increaseLiquidity(increaseLiquidityParams);
         }
         emit Deposited(amount);
@@ -99,14 +99,17 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
             amount1Max: uint128(amount1)
         });
         positionManager.collect(collectParams);
-        uint256 convertedtorqAmount = convertWETHtotorq(amount1);
-        amount0 = amount0.add(convertedtorqAmount);
-        require(torqToken.transfer(msg.sender, amount0), "Transfer Asset Failed");
+        uint256 convertedTorqAmount = convertWETHtoTorq(amount0);
+        amount1 = amount1.add(convertedTorqAmount);
+        require(torqToken.transfer(msg.sender, amount1), "Transfer Asset Failed");
         emit Withdrawal(amount);
     }
 
     function compound() external {
         require(msg.sender == controller, "Only controller can call this!");
+        if(!poolInitialised){
+            return;
+        }
         INonfungiblePositionManager.CollectParams memory collectParams =
             INonfungiblePositionManager.CollectParams({
                 tokenId: tokenId,
@@ -114,8 +117,8 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
                 amount0Max: type(uint128).max,
                 amount1Max: type(uint128).max
         });
-        (, uint256 wethVal) = positionManager.collect(collectParams);
-        convertWETHtotorq(wethVal);
+        (uint256 wethVal,) = positionManager.collect(collectParams);
+        convertWETHtoTorq(wethVal);
         uint256 torqAmount = torqToken.balanceOf(address(this));
         require(torqToken.transfer(msg.sender, torqAmount), "Transfer Asset Failed");
     }
@@ -124,15 +127,15 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
         controller = _controller;
     }
 
-    function createMintParams(uint256 torqToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.MintParams memory) {
+    function createMintParams(uint256 wethAmount, uint256 torqToKeep, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.MintParams memory) {
         return INonfungiblePositionManager.MintParams({
-            token0: address(torqToken),
-            token1: address(wethToken),
+            token0: address(wethToken),
+            token1: address(torqToken),
             fee: poolFee,
             tickLower: tickLower,
             tickUpper: tickUpper,
-            amount0Desired: torqToKeep,
-            amount1Desired: wethAmount,
+            amount0Desired: wethAmount,
+            amount1Desired: torqToKeep,
             amount0Min: amount0Min,
             amount1Min: amount1Min,
             recipient: address(this),
@@ -140,11 +143,11 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
         });
     }
 
-    function createIncreaseLiquidityParams(uint256 torqToKeep, uint256 wethAmount, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.IncreaseLiquidityParams memory) {
+    function createIncreaseLiquidityParams(uint256 wethAmount, uint256 torqToKeep, uint256 amount0Min, uint256 amount1Min) internal view returns (INonfungiblePositionManager.IncreaseLiquidityParams memory) {
         return INonfungiblePositionManager.IncreaseLiquidityParams({
             tokenId: tokenId,
-            amount0Desired: torqToKeep,
-            amount1Desired: wethAmount,
+            amount0Desired: wethAmount,
+            amount1Desired: torqToKeep,
             amount0Min: amount0Min,
             amount1Min: amount1Min,
             deadline: block.timestamp + 2 minutes
@@ -177,7 +180,7 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
         poolFee = _poolFee;
     }
 
-    function converttorqtoWETH(uint256 torqAmount) internal returns (uint256) {
+    function convertTorqtoWETH(uint256 torqAmount) internal returns (uint256) {
         torqToken.approve(address(swapRouter), torqAmount);
         ISwapRouter.ExactInputSingleParams memory params =  
             ISwapRouter.ExactInputSingleParams({
@@ -193,7 +196,7 @@ contract UniswapTORQ is Ownable, ReentrancyGuard {
         return swapRouter.exactInputSingle(params);
     }
 
-    function convertWETHtotorq(uint256 wethAmount) internal returns (uint256) {
+    function convertWETHtoTorq(uint256 wethAmount) internal returns (uint256) {
         wethToken.approve(address(swapRouter), wethAmount);
         ISwapRouter.ExactInputSingleParams memory params =  
             ISwapRouter.ExactInputSingleParams({
