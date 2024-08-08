@@ -94,10 +94,6 @@ contract SimpleUSDTBorrow is SimpleBorrowAbstract {
         // Effects
         uint accruedInterest = calculateInterest(borrowed, borrowTime);
         borrowed = borrowed.add(accruedInterest);
-        
-        uint withdrawAssetAmount = supplied.mul(usdcRepay).div(borrowed); 
-        
-        require(usdtWithdraw <= withdrawAssetAmount, "Cannot withdraw this much USDT");
 
         supplied = supplied.sub(usdtWithdraw);
         borrowed = borrowed.sub(usdcRepay);
