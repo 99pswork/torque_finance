@@ -46,7 +46,7 @@ contract GMXV2LINK is Ownable, ReentrancyGuard {
     mapping (address => uint256) public usdcAmount;
     mapping (address => uint256) public linkAmount;
 
-    address public treasury = 0x0f773B3d518d0885DbF0ae304D87a718F68EEED5;
+    address public treasury = 0x177f6519A523EEbb542aed20320EFF9401bC47d0;
 
     address dataStore = 0xFD70de6b91282D8017aA4E741e9Ae325CAb992d8;
     IChainlinkOracle chainlinkOracle = IChainlinkOracle(0xb6C62D5EB1F572351CC66540d043EF53c4Cd2239);

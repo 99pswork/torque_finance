@@ -43,7 +43,7 @@ contract GMXV2ETH is Ownable, ReentrancyGuard {
     uint24 feeAmt = 500;
     address controller;
 
-    address public treasury = 0x0f773B3d518d0885DbF0ae304D87a718F68EEED5;
+    address public treasury = 0x177f6519A523EEbb542aed20320EFF9401bC47d0;
     mapping (address => uint256) public usdcAmount;
     mapping (address => uint256) public wethAmount;
     
