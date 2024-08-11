@@ -13,7 +13,7 @@ contract LodestarRefinanceWbtc {
 
     constructor() {}
     
-    function torqRefinance(uint256 deposit) {
+    function torqRefinance(uint256 deposit) external {
 
     }
 
