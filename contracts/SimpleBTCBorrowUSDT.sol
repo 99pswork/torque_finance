@@ -94,10 +94,6 @@ contract SimpleBTCBorrowUSDT is SimpleBorrowAbstractUSDT {
         // Effects
         uint accruedInterest = calculateInterest(borrowed, borrowTime);
         borrowed = borrowed.add(accruedInterest);
-        
-        uint withdrawAssetAmount = supplied.mul(usdtRepay).div(borrowed); 
-        
-        require(WbtcWithdraw <= withdrawAssetAmount, "Cannot withdraw this much WBTC");
 
         supplied = supplied.sub(WbtcWithdraw);
         borrowed = borrowed.sub(usdtRepay);

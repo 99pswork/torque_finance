@@ -94,10 +94,6 @@ contract SimpleETHBorrowUSDT is SimpleBorrowAbstractUSDT {
         // Effects
         uint accruedInterest = calculateInterest(borrowed, borrowTime);
         borrowed = borrowed.add(accruedInterest);
-
-        uint withdrawAssetAmount = supplied.mul(usdtRepay).div(borrowed); 
-
-        require(WETHWithdraw <= withdrawAssetAmount, "Cannot withdraw this much WETH");
         
         supplied = supplied.sub(WETHWithdraw);
         borrowed = borrowed.sub(usdtRepay);

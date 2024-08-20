@@ -27,7 +27,7 @@ contract ETHBorrowFactory is Ownable {
     event ETHBorrowDeployed(address indexed location, address indexed recipient);
     
     mapping (address => address payable) public userContract; // User address --> Contract Address
-    address public newOwner = 0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01;
+    address public newOwner = 0x7fb3933a47D20ab591D4F136E36865576c6f305c;
     address public treasury = 0x177f6519A523EEbb542aed20320EFF9401bC47d0;
     RewardsUtil public rewardsUtil = RewardsUtil(0x55cEeCBB9b87DEecac2E73Ff77F47A34FDd4Baa4);
     address public asset = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;

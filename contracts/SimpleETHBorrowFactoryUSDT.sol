@@ -28,7 +28,7 @@ contract SimpleETHBorrowUSDTFactory is Ownable {
     event ETHBorrowDeployed(address indexed location, address indexed recipient);
     
     mapping (address => address payable) public userContract; // User address --> Contract Address
-    address public newOwner = 0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01;
+    address public newOwner = 0x7fb3933a47D20ab591D4F136E36865576c6f305c;
     address public treasury = 0x177f6519A523EEbb542aed20320EFF9401bC47d0;
     RewardsUtil public torqRewardsUtil = RewardsUtil(0x3452faA42fd613937dCd43E0f0cBf7d4205919c5);
     RewardsUtil public arbRewardsUtil = RewardsUtil(0x6965b496De9b7C0bF274F8f6D5Dfa359Ac7D3b72);

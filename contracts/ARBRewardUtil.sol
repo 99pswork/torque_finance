@@ -32,7 +32,7 @@ contract ARBRewardUtil is ReentrancyGuard, Ownable {
     }
 
     IERC20 public arbToken = IERC20(0x912CE59144191C1204E64559FE8253a0e49E6548);
-    address public governor = address(0xC4B853F10f8fFF315F21C6f9d1a1CEa8fbF0Df01);
+    address public governor = address(0x7fb3933a47D20ab591D4F136E36865576c6f305c);
     bool public claimsPaused = false;
 
     mapping(address => bool) public isTorqueContract;
