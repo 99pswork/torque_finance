@@ -8,17 +8,17 @@ const hre = require("hardhat");
 
 
 async function deploySimpleETHFactory() {
-  const ETHBorrow = await hre.ethers.getContractFactory("SimpleETHBorrowFactory");
+  const ETHBorrow = await hre.ethers.getContractFactory("SimpleETHBorrowFactoryV2");
   let ethBorrow;
-  console.log("SimpleETHBorrowFactory factory created.");
+  console.log("SimpleETHBorrowFactoryV2 factory created.");
   try{
       ethBorrow = await ETHBorrow.deploy();
   }
   catch (error) {
-    console.error("Error deploying SimpleETHBorrowFactory:", error);
+    console.error("Error deploying SimpleETHBorrowFactoryV2:", error);
     process.exit(1);
   }
-  console.log("SimpleETHBorrowFactory Contract Address", ethBorrow.target);
+  console.log("SimpleETHBorrowFactoryV2 Contract Address", ethBorrow.target);
   return ethBorrow;
 }
 
